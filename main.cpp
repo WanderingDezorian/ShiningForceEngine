@@ -20,6 +20,7 @@
 //TODO: Demonstrate keyboard control works
 
 #include <iostream>
+#include "main.h"
 using namespace std;
 
 void PrintHelpMessage(){
@@ -38,6 +39,27 @@ void PrintHelpMessage(){
 
 int main(int argc, char** argv){
 	PrintHelpMessage();
+
+	// Initialize all systems
+
+	// Enter master loop
+
+	MainGameMode NextModeToEnter = MODE_STARTSCREEN;
+
+	while(NextModeToEnter != MODE_EXITPROGRAM){
+		switch(NextModeToEnter){
+			case MODE_STARTSCREEN:
+			case MODE_TOWN:
+			case MODE_BATTLE:
+			case MODE_ENDING:
+			case MODE_EXITPROGRAM:
+				cerr << "Unhandled mode requested.  Exiting." << endl;
+				NextModeToEnter = MODE_EXITPROGRAM;
+		}
+	}
+
+	// Close everything.
+
 	return 0;
 }
 
