@@ -1,0 +1,24 @@
+[Build plan] (I like to lay out milestones for myself. It helps me see what I'm working towards, how far along I am, and where to focus my efforts.)
+Pre-release v1:
+* Game has simple start-screen, simple map (checkerboard tiles, no scrolling, win by leaving map)
+* Demonstrate graphics, music, and keyboard control all work
+Pre-release v2:
+* Incorporate scrolling map, with simple walking animations (ground and sprite layer only)
+* Use tiled map using loaded images
+* Use "blocks" to prevent movement in key areas
+* Demonstrate transition to new maps- use a simple overworld and two towns.
+* This is the basis for the overmap game
+Pre-release v3:
+* Incorporate entry into simple "battle"- for now, use a simple map, win by walking over the single "enemy"
+* Add NPCs to maps. NPCs should move, but do not need animations yet. Demonstrate fixed position, path following, and brownian motion profiles. NPCs should block player motion, and should not be able to walk on blocked squares.
+* Add conversations with NPCs. Demonstrate yes/no questions, storyline flags, and portraits. Portraits do not need animation yet.
+Pre-release v4:
+* Focus on battles, with this release demonstrating movement and targeting.
+* Incorporate allies and multiple enemies.
+* Demonstrate initiative, with players and enemies taking turns as appropriate.
+* Demonstrate limited movement range per turn, shining-force style.
+* Demonstrate target selection for attacks.
+* Demonstrate simple attacks- no animation, instant kill of target.
+* Demonstrate simple AI- move straight towards nearest ally, attack if possible.
+Later releases:
+Exact order of releases will depend on the needs of the story team. These should include graphics improvements (animations, etc), incorporating combat rules, incorporating AI, incorporating any special things the story needs, and incorporating a real start screen and opening scene.

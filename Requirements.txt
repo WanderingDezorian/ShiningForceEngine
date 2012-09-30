@@ -1,0 +1,34 @@
+[System Requirements]
+OS: Windows, Linux
+Language: Python (development), ported into C++ for release?
+Graphics: PyGame (SDL for C++ release?)
+
+[Top-Level Requirements]
+Game has three major modes: Start screen, map/overworld, battle (Any others? Cutscene?)
+Shining-force style menus, status screens, conversations, etc. (Anything else?)
+Conversations mostly linear, but can branch with yes/no questions. (Is that enough, or do you need more?)
+Need to have some way to script or hardcode "actions" that happen when player steps onto a space- start of cutscene, strip away building roof, NPC movement, etc. (What sorts of triggers do you want for the story?)
+Need an intelligent opponent AI - TBD (Has anyone looked at this?)
+Need the combat system's mechanics laid out (what do the numbers mean, what calculations etc) - TBD (Has anyone worked this out yet?)
+Graphics should have a subground layer (parallax), ground layer (tiled), sprite layer, upper layer (tiled). Parallax layer may scroll, tiled layers are fixed (typically no animation, but water and similar tiles may animate), sprite layer has free animation. (Is that enough? This would give you everything that was in SF1+2.)
+
+[The nitty gritty]
+Tile Size = ??? (I need a number to help me code)
+Screen size = ??? (How many tiles on the screen?)
+Color spec = Full color, no alpha shading (Is that enough?)
+FMV required = ??? (If I code in FMV capabilities, ya'all better have a darn cool looking video for this to show)
+
+[File formats]
+Images = .png
+Sprite metadata = .xml
+BGM = .mp3
+Sound effects = .wav
+Map files = .xml (?)
+Character files = .xml
+
+[Libraries]
+Images = libpng
+Xml Parser = RapidXml (alternate candidates:  pugixml, tinyxml, ticpp)
+Zip files = minizip (w/ zlib)
+
+
