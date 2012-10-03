@@ -4,12 +4,18 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../GraphicsCore.cpp \
+../InterfaceCore.cpp \
 ../main.cpp 
 
 OBJS += \
+./GraphicsCore.o \
+./InterfaceCore.o \
 ./main.o 
 
 CPP_DEPS += \
+./GraphicsCore.d \
+./InterfaceCore.d \
 ./main.d 
 
 
