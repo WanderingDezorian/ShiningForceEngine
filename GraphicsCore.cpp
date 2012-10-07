@@ -28,6 +28,12 @@ bool GraphicsCore::FlipBuffer(){
 //	RenderPresent(Renderer);
 }
 
-bool GraphicsCore::PrepareNextFrame(const GameState &CurrentState){
+bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
+	// Draw tile layers below sprite layer
+	// Draw sprite layer
+	// Draw tile layers above sprite layer
+	// Draw special layers
+	for(std::vector<SpecialtyBuffer>::const_iterator iBuf = CurrentState.SpecialBuffers.begin(); iBuf != CurrentState.SpecialBuffers.end(); iBuf++)
+		iBuf->Blit(MainWindow);
 	return true;
 }

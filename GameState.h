@@ -1,6 +1,13 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
+#include "GraphicsCore.h"
+#include "InterfaceCore.h"
+
+struct GameState;
+
+typedef bool (*GameLogicFunction) (GameState &MainGameState);
+
 struct GameState{
 	enum TypeMainGameMode{
 		MODE_STARTSCREEN,
@@ -12,8 +19,13 @@ struct GameState{
 	bool InitializeNewMode;
 	int FramesUntilLowRate; // Must be set positive by low-rate logic call.
 
-	bool GraphicsFlipRequired;
-	bool GraphicsBufferRefreshRequred;
+	GameLogicFunction InitializeFunction;
+	GameLogicFunction MinorTicUpdate;
+	GameLogicFunction MajorTicUpdate;
+	// Here is the interface data
+	InterfaceCore Interface;
+	// Here is the graphical data
+	GraphicalData Graphics;
 
 };
 

@@ -56,7 +56,6 @@ int main(int argc, char** argv){
 
 	// Initialize all systems
 	GraphicsCore myGraphicsCore; // Must be first - initializes SDL
-	InterfaceCore myInterfaceCore;
 	GameState myGameState;
 	if(SDL_WasInit(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != (SDL_INIT_VIDEO | SDL_INIT_AUDIO)){
 		cerr << "Failed to initialize SDL.  Aborting." << endl;
@@ -65,62 +64,44 @@ int main(int argc, char** argv){
 
 	myGameState.MainGameMode = GameState::MODE_STARTSCREEN;
 	myGameState.InitializeNewMode = true;
-	myGameState.GraphicsFlipRequired = false;
-	myGameState.GraphicsBufferRefreshRequred = false;
+	myGameState.Graphics.GraphicsFlipRequired = false;
+	myGameState.Graphics.GraphicsRefreshRequired = false;
+	myGameState.InitializeFunction = Initialize_StartScreen;
 
 	// Enter master loop
 	const clock_t ClocksPerFrame = CLOCKS_PER_SEC / 30;
 
 	while(myGameState.MainGameMode != GameState::MODE_EXITPROGRAM){
 		clock_t NextFrame = clock() + ClocksPerFrame;
-		if(myGameState.GraphicsFlipRequired){
+		if(myGameState.Graphics.GraphicsFlipRequired){
 			myGraphicsCore.FlipBuffer();
-			myGameState.GraphicsFlipRequired = false;
+			myGameState.Graphics.GraphicsFlipRequired = false;
 		}
-		if(myGameState.GraphicsBufferRefreshRequred){
-			myGraphicsCore.PrepareNextFrame(myGameState);
-			myGameState.GraphicsBufferRefreshRequred = false;
+		if(myGameState.Graphics.GraphicsRefreshRequired){
+			myGraphicsCore.PrepareNextFrame(myGameState.Graphics);
+			myGameState.Graphics.GraphicsFlipRequired = true;
+			myGameState.Graphics.GraphicsRefreshRequired = false;
 		}
-		myInterfaceCore.PollInterface(NextFrame);
+		myGameState.Interface.PollInterface(NextFrame);
 		// Process game logic
-		switch(myGameState.MainGameMode){
-			case GameState::MODE_STARTSCREEN:
-				if(myGameState.InitializeNewMode){
-					SDL_Surface* File = SDL_LoadBMP("TitleFrame1.bmp");
-					if(File == NULL){
-						cerr << "Unable to load file TitleFrame1.bmp" << endl;
-						myGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
-						break;
-					}
-					SDL_BlitSurface(File,NULL,myGraphicsCore.GetMainWindow(),NULL);
-//					myGraphicsCore.FlipBuffer();
-//					File = SDL_LoadBMP("TitleFrame2.bmp");
-//					if(File == NULL){
-//						cerr << "Unable to load file TitleFrame2.bmp" << endl;
-//						myGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
-//						break;
-//					}
-//					SDL_BlitSurface(File,NULL,myGraphicsCore.GetMainWindow(),NULL);
-					myGameState.FramesUntilLowRate = 30;
-					myGameState.InitializeNewMode = false;
-				}
-				if(myGameState.FramesUntilLowRate)
-					myGameState.FramesUntilLowRate--;
-				else{
-					myGameState.GraphicsFlipRequired = true;
-					myGameState.FramesUntilLowRate = 30;
-				}
-			case GameState::MODE_TOWN:
-			case GameState::MODE_BATTLE:
-			case GameState::MODE_ENDING:
-				if(myInterfaceCore.GetButtonState() & InterfaceCore::KEY_EXIT)
-					myGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
-			case GameState::MODE_EXITPROGRAM:
-				break;
-			default:
-				cerr << "Unhandled mode requested.  Exiting." << endl;
-				myGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
+		if(myGameState.InitializeFunction){
+			myGameState.Graphics.Reset();
+			myGameState.FramesUntilLowRate = 0; // Force a major update this turn, unless overridden
+			if(myGameState.InitializeFunction(myGameState))
+				myGameState.InitializeFunction = 0;
+			else
+				AbortGame(myGameState,"Failed to initialize new mode.  Aborting program.");
+		} // if(myGameState.InitializeNewMode)
+		myGameState.MinorTicUpdate(myGameState);
+		if(myGameState.FramesUntilLowRate)
+			myGameState.FramesUntilLowRate--;
+		else{
+			myGameState.MajorTicUpdate(myGameState);
+			if(!myGameState.FramesUntilLowRate) // TODO:  Should be assert
+				AbortGame(myGameState,"Failed to update FramesUntilLowRate.  Aborting program.");
 		}
+		// Wait for next frame
+		while(clock() < NextFrame);
 	}
 
 	// Close everything.
