@@ -3,6 +3,7 @@
 
 #include <SDL/SDL.h>
 #include <vector>
+#include <string>
 
 struct CameraStruct{
 	unsigned int TileX, TileY, SubX, SubY;
@@ -18,7 +19,9 @@ struct Sprite{
 		UPDATE_LINEAR,
 		UPDATE_BACKANDFORTH_FORWARD,
 		UPDATE_BACKANDFORTH_BACKWARD,
-		UPDATE_SINGLEPASS,
+		UPDATE_SINGLEPASSANDFREEZE,
+		UPDATE_SINGLEPASSANDVANISH,
+		UPDATE_PAUSED,
 		UPDATE_INVISIBLE
 	} UpdatePattern;
 };
@@ -71,12 +74,16 @@ class GraphicsCore{
 		SDL_Surface* TileBuffer;
 		unsigned int TileBufferSize;
 		std::vector<SDL_Surface*> SpecialtyBuffers;
+		SDL_Rect TileRect;
+		SDL_Rect DestRect;
 		//SDL_Renderer* Renderer;
 
 	public:
 		GraphicsCore();
 		~GraphicsCore();
 
+		bool AllocateTileBuffer(unsigned int Size);
+		bool LoadTileBuffer(const std::vector<std::string> &Filenames);
 		bool FlipBuffer();
 		bool PrepareNextFrame(const GraphicalData &CurrentState);
 		SDL_Surface* GetMainWindow(){ return MainWindow; }

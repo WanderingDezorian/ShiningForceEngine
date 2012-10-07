@@ -5,11 +5,11 @@
 
 void AbortGame(GameState &MainGameState, const char* Message = 0);
 
-bool Initialize_StartScreen(GameState &MainGameState);
-bool Initialize_Town(GameState &MainGameState);
-bool Initialize_Battle(GameState &MainGameState);
-bool Initialize_Ending(GameState &MainGameState);
-bool Initialize_ExitProgram(GameState &MainGameState);
+bool Initialize_StartScreen(GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Town(GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Ending(GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_ExitProgram(GameState &MainGameState, std::vector<std::string> &TileFilenames);
 
 bool Logic_MinorTic_StartScreen(GameState &MainGameState);
 bool Logic_MinorTic_Town(GameState &MainGameState);

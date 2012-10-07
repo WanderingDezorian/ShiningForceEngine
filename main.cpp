@@ -87,10 +87,13 @@ int main(int argc, char** argv){
 		if(myGameState.InitializeFunction){
 			myGameState.Graphics.Reset();
 			myGameState.FramesUntilLowRate = 0; // Force a major update this turn, unless overridden
-			if(myGameState.InitializeFunction(myGameState))
+			std::vector<std::string> TileFilenames;
+			if(myGameState.InitializeFunction(myGameState,TileFilenames))
 				myGameState.InitializeFunction = 0;
 			else
 				AbortGame(myGameState,"Failed to initialize new mode.  Aborting program.");
+			if(!myGraphicsCore.LoadTileBuffer(TileFilenames))
+				AbortGame(myGameState,"Failed to load required tiles.  Aborting program.");
 		} // if(myGameState.InitializeNewMode)
 		myGameState.MinorTicUpdate(myGameState);
 		if(myGameState.FramesUntilLowRate)

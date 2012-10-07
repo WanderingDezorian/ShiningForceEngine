@@ -2,12 +2,12 @@
 #include <iostream>
 void AbortGame(GameState &MainGameState, const char* Message){
 	if(Message)
-		std::cerr << Message;
+		std::cerr << Message << std::endl;
 	MainGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
 	MainGameState.InitializeFunction = Initialize_ExitProgram;
 }
 
-bool Initialize_StartScreen(GameState &MainGameState){
+bool Initialize_StartScreen(GameState &MainGameState, std::vector<std::string> &TileFilenames){
 	MainGameState.Graphics.SpecialBuffers.resize(2);
 	if(!MainGameState.Graphics.SpecialBuffers[0].Load("TitleFrame1.bmp"))
 		return false;
@@ -25,8 +25,10 @@ bool Logic_MinorTic_StartScreen(GameState &MainGameState){
 	unsigned char Buttons = MainGameState.Interface.GetButtonState();
 	if(Buttons & InterfaceCore::KEY_EXIT)
 		AbortGame(MainGameState);
-	else if(Buttons & InterfaceCore::KEY_START)
-		AbortGame(MainGameState,"Start button pressed, entering battle.");//MainGameState.InitializeFunction = Initialize_Battle;
+	else if(Buttons & InterfaceCore::KEY_START){
+		std::cerr << "Start button pressed, entering battle." << std::endl;
+		MainGameState.InitializeFunction = Initialize_Battle;
+	}
 	return true;
 }
 
@@ -43,8 +45,8 @@ bool Logic_MajorTic_StartScreen(GameState &MainGameState){
 	return true;
 }
 
-bool Initialize_ExitProgram(GameState &MainGameState){
-	MainGameState.MainGameMode == GameState::MODE_EXITPROGRAM;
+bool Initialize_ExitProgram(GameState &MainGameState, std::vector<std::string> &TileFilenames){
+	MainGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
 	return true;
 }
 bool Logic_MinorTic_ExitProgram(GameState &MainGameState){

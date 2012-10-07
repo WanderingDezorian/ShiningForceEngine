@@ -6,18 +6,21 @@
 CPP_SRCS += \
 ../GraphicsCore.cpp \
 ../InterfaceCore.cpp \
+../Logic_Battle.cpp \
 ../Logic_StartScreen.cpp \
 ../main.cpp 
 
 OBJS += \
 ./GraphicsCore.o \
 ./InterfaceCore.o \
+./Logic_Battle.o \
 ./Logic_StartScreen.o \
 ./main.o 
 
 CPP_DEPS += \
 ./GraphicsCore.d \
 ./InterfaceCore.d \
+./Logic_Battle.d \
 ./Logic_StartScreen.d \
 ./main.d 
 
