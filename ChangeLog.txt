@@ -1,0 +1,6 @@
+Pre-release v1: (Released 10/13/12)
+ Game has simple start-screen
+ Game has simple map (checkerboard tiles, no scrolling)
+ Demonstrate graphics works
+ Demonstrate keyboard control works
+

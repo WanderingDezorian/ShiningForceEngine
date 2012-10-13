@@ -11,17 +11,18 @@ Need to have some way to script or hardcode "actions" that happen when player st
 Need an intelligent opponent AI - TBD (Has anyone looked at this?)
 Need the combat system's mechanics laid out (what do the numbers mean, what calculations etc) - TBD (Has anyone worked this out yet?)
 Graphics should have a subground layer (parallax), ground layer (tiled), sprite layer, upper layer (tiled). Parallax layer may scroll, tiled layers are fixed (typically no animation, but water and similar tiles may animate), sprite layer has free animation. (Is that enough? This would give you everything that was in SF1+2.)
+Control should have the following buttons: OK, Cancel, Up/Down/Left/Right, Start, Exit (abort game). Keys should be mappable. Game pad / joystick control should be included.
 
 [The nitty gritty]
-Tile Size = ??? (I need a number to help me code)
-Screen size = ??? (How many tiles on the screen?)
+Tile Size = 24x24 map tiles, 96x96 / 128 x 128 battle animation sprites, 8x8 atomics (smallest possible sprite size, for letters, etc)
+Screen size = 320x240 (Genesis screen is 320x224, but 240 is a more common screen resolution and won't look as odd on most monitors)
 Color spec = Full color, no alpha shading (Is that enough?)
 FMV required = ??? (If I code in FMV capabilities, ya'all better have a darn cool looking video for this to show)
 
 [File formats]
 Images = .png
 Sprite metadata = .xml
-BGM = .mp3
+BGM = Ogg Vorbis (license free and higher fidelity than mp3, plus easier for me to program. Free conversion software from mp3 exists)
 Sound effects = .wav
 Map files = .xml (?)
 Character files = .xml
@@ -30,5 +31,5 @@ Character files = .xml
 Images = libpng
 Xml Parser = RapidXml (alternate candidates:  pugixml, tinyxml, ticpp)
 Zip files = minizip (w/ zlib)
-
+BGM files = libvorbis
 

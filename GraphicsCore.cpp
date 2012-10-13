@@ -40,10 +40,14 @@ bool GraphicsCore::FlipBuffer(){
 
 bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 	// Draw tile layers below sprite layer
-	std::vector<TileMapping>::const_iterator iSpriteLayer = CurrentState.TileLayers.begin() + CurrentState.SpriteLayerDepth;
-	if(iSpriteLayer > CurrentState.TileLayers.end())
+	std::vector<TileMapping>::const_iterator iSpriteLayer;
+	if(CurrentState.SpriteLayerDepth > CurrentState.TileLayers.size())
 		iSpriteLayer = CurrentState.TileLayers.end();
+	else
+		iSpriteLayer = CurrentState.TileLayers.begin() + CurrentState.SpriteLayerDepth;
+	CameraStruct SpriteLayerPosition = {0};
 	for(std::vector<TileMapping>::const_iterator iLayer = CurrentState.TileLayers.begin(); iLayer < iSpriteLayer; iLayer++){
+		SpriteLayerPosition = iLayer->Camera;
 		int Y, yEnd;
 		SDL_Rect TempDest;
 		const unsigned int* TileMapBase = &(iLayer->TileValues.at(0));
@@ -51,7 +55,7 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 			DestRect.y = 24 * Y -iLayer->Camera.SubY;
 			DestRect.x = -iLayer->Camera.SubX;
 			const unsigned int *iTile, *iTileEnd;
-			for(iTile = TileMapBase + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 14; iTile < iTileEnd; iTile++){
+			for(iTile = TileMapBase + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
 				if(*iTile != TileMapping::NOT_A_TILE){
 					TileRect.x = *iTile * 24;
 					TempDest = DestRect;
@@ -67,13 +71,31 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		for(iSprite = &(CurrentState.AllSprites.at(0)), iSpriteEnd = iSprite + CurrentState.AllSprites.size(); iSprite < iSpriteEnd; iSprite++){
 			if(iSprite->UpdatePattern != iSprite->UPDATE_INVISIBLE){
 				TileRect.x = (iSprite->RootBufferOffset + iSprite->OrientationBufferOffset + iSprite->CurrentOffset) * 24;
-				DestRect.x = iSprite->Position.TileX * 24 + iSprite->Position.SubX;
-				DestRect.y = iSprite->Position.TileY * 24 + iSprite->Position.SubY;
+				DestRect.x = (iSprite->Position.TileX - SpriteLayerPosition.TileX) * 24 + iSprite->Position.SubX - SpriteLayerPosition.SubX; // TODO:  Should these just be ints to avoid nastiness?
+				DestRect.y = (iSprite->Position.TileY - SpriteLayerPosition.TileY) * 24 + iSprite->Position.SubY - SpriteLayerPosition.SubY;
 				SDL_BlitSurface(TileBuffer,&TileRect,MainWindow,&DestRect);
 			}
 		}
 	}
 	// Draw tile layers above sprite layer
+	for(std::vector<TileMapping>::const_iterator iLayer = iSpriteLayer; iLayer < CurrentState.TileLayers.end(); iLayer++){
+		int Y, yEnd;
+		SDL_Rect TempDest;
+		const unsigned int* TileMapBase = &(iLayer->TileValues.at(0));
+		for(Y = iLayer->Camera.TileY, yEnd = Y + 11; Y < yEnd; Y++){
+			DestRect.y = 24 * Y -iLayer->Camera.SubY;
+			DestRect.x = -iLayer->Camera.SubX;
+			const unsigned int *iTile, *iTileEnd;
+			for(iTile = TileMapBase + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
+				if(*iTile != TileMapping::NOT_A_TILE){
+					TileRect.x = *iTile * 24;
+					TempDest = DestRect;
+					SDL_BlitSurface(TileBuffer,&TileRect,MainWindow,&TempDest);
+				}
+				DestRect.x += 24;
+			}
+		}
+	}
 	// Draw special layers
 	for(std::vector<SpecialtyBuffer>::const_iterator iBuf = CurrentState.SpecialBuffers.begin(); iBuf != CurrentState.SpecialBuffers.end(); iBuf++)
 		iBuf->Blit(MainWindow);

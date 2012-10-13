@@ -7,17 +7,11 @@
 #define VERSION_MINOR      1 // Pre-release version 1
 #define VERSION_REVISION   0 // First edit of this revision
 //
-#define BUILD_IS_RELEASED  false // Candidate build
+#define BUILD_IS_RELEASED  true // Candidate build
 //
 // See Changelog.txt for more details
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-//TODO: Game has simple start-screen
-//TODO: Game has simple map (checkerboard tiles, no scrolling, win by leaving map)
-//TODO: Demonstrate graphics works
-//TODO: Demonstrate music works
-//TODO: Demonstrate keyboard control works
 
 #include <SDL/SDL.h>
 #include <iostream>
@@ -70,19 +64,15 @@ int main(int argc, char** argv){
 
 	// Enter master loop
 	const clock_t ClocksPerFrame = CLOCKS_PER_SEC / 30;
+	const clock_t ClocksPerStep = ClocksPerFrame / 3;
 
 	while(myGameState.MainGameMode != GameState::MODE_EXITPROGRAM){
-		clock_t NextFrame = clock() + ClocksPerFrame;
-		if(myGameState.Graphics.GraphicsFlipRequired){
-			myGraphicsCore.FlipBuffer();
-			myGameState.Graphics.GraphicsFlipRequired = false;
-		}
-		if(myGameState.Graphics.GraphicsRefreshRequired){
-			myGraphicsCore.PrepareNextFrame(myGameState.Graphics);
-			myGameState.Graphics.GraphicsFlipRequired = true;
-			myGameState.Graphics.GraphicsRefreshRequired = false;
-		}
-		myGameState.Interface.PollInterface(NextFrame);
+		clock_t NextFrame = clock();
+		clock_t NextStep = NextFrame + ClocksPerStep;
+		NextFrame += ClocksPerFrame;
+
+		myGameState.Interface.PollInterface(NextStep);
+		NextStep += ClocksPerStep;
 		// Process game logic
 		if(myGameState.InitializeFunction){
 			myGameState.Graphics.Reset();
@@ -100,11 +90,22 @@ int main(int argc, char** argv){
 			myGameState.FramesUntilLowRate--;
 		else{
 			myGameState.MajorTicUpdate(myGameState);
-			if(!myGameState.FramesUntilLowRate) // TODO:  Should be assert
-				AbortGame(myGameState,"Failed to update FramesUntilLowRate.  Aborting program.");
 		}
+		if(clock() >= NextStep)
+			cerr << "Logic overran alloted time" << endl;
 		// Wait for next frame
+		if(myGameState.Graphics.GraphicsRefreshRequired){
+			myGraphicsCore.PrepareNextFrame(myGameState.Graphics);
+			myGameState.Graphics.GraphicsFlipRequired = true;
+			myGameState.Graphics.GraphicsRefreshRequired = false;
+		}
+		if(clock() >= NextFrame)
+			cerr << "Graphic redraw overran alloted time" << endl;
 		while(clock() < NextFrame);
+		if(myGameState.Graphics.GraphicsFlipRequired){
+			myGraphicsCore.FlipBuffer();
+			myGameState.Graphics.GraphicsFlipRequired = false;
+		}
 	}
 
 	// Close everything.

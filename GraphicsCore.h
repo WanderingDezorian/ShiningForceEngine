@@ -59,6 +59,7 @@ struct GraphicalData{
 	std::vector<Sprite> AllSprites;
 	std::vector<SpecialtyBuffer> SpecialBuffers;
 	unsigned int SpriteLayerDepth; // Depth i means sprite layer is drawn before layer i.
+
 	void Reset(){
 		GraphicsRefreshRequired = true;
 		GraphicsFlipRequired = false;

@@ -1,17 +1,30 @@
-[Build plan] (I like to lay out milestones for myself. It helps me see what I'm working towards, how far along I am, and where to focus my efforts.)
+Status:
+[ ]-(..........):   Listed
+[ ]-(    MyName):   Assigned
+[I]-(    MyName): = In-progress
+[C]-(    MyName): = Complete, to be verified
+[X]-(    MyName): = Verified, closed
+
 Pre-release v1:
-* Game has simple start-screen, simple map (checkerboard tiles, no scrolling, win by leaving map)
-* Demonstrate graphics, music, and keyboard control all work
+[X]-(    Happel):   Game has simple start-screen
+[X]-(    Happel):   Game has simple map (checkerboard tiles, no scrolling)
+[X]-(    Happel):   Demonstrate graphics works
+[X]-(    Happel):   Demonstrate keyboard control works
 Pre-release v2:
-* Incorporate scrolling map, with simple walking animations (ground and sprite layer only)
-* Use tiled map using loaded images
-* Use "blocks" to prevent movement in key areas
-* Demonstrate transition to new maps- use a simple overworld and two towns.
-* This is the basis for the overmap game
+[ ]-(    Happel):   Read from png images
+[ ]-(    Happel):   Read from xml files
+[ ]-(    Happel):   Read from ogg vorbis music files
+[ ]-(    Happel):   Incorporate scrolling map (ground layer only)
+[ ]-(    Happel):   Incorporate simple walking animations (ground and sprite layer only)
+[ ]-(    Happel):   Use tiled map using loaded images
+[ ]-(    Happel):   Use "blocks" to prevent movement in key areas
+[ ]-(    Happel):   Demonstrate transition to new maps- use a simple overworld and two towns.
+[ ]-(    Happel):   Add background music support
 Pre-release v3:
 * Incorporate entry into simple "battle"- for now, use a simple map, win by walking over the single "enemy"
 * Add NPCs to maps. NPCs should move, but do not need animations yet. Demonstrate fixed position, path following, and brownian motion profiles. NPCs should block player motion, and should not be able to walk on blocked squares.
 * Add conversations with NPCs. Demonstrate yes/no questions, storyline flags, and portraits. Portraits do not need animation yet.
+* Add sound effect support
 Pre-release v4:
 * Focus on battles, with this release demonstrating movement and targeting.
 * Incorporate allies and multiple enemies.
