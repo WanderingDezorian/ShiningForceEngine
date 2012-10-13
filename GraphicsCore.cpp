@@ -1,5 +1,6 @@
 #include <SDL/SDL.h>
 #include "GraphicsCore.h"
+#include "ResourceCore.h"
 
 GraphicsCore::GraphicsCore() : MainWindow(0), TileBuffer(0){
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
@@ -124,7 +125,7 @@ bool GraphicsCore::LoadTileBuffer(const std::vector<std::string> &Filenames){
 	DestRect.x = 0;
 	DestRect.y = 0;
 	for(int i = 0; i < Filenames.size(); i++){
-		SDL_Surface* Buffer = SDL_LoadBMP(Filenames[i].c_str());
+		SDL_Surface* Buffer = LoadPng(Filenames[i].c_str());
 		if(!Buffer)
 			return false;
 		TileRect.x = i*24;

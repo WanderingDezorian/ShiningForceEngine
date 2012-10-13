@@ -3,8 +3,8 @@
 bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileFilenames){
 	MainGameState.Graphics.TileLayers.resize(1);
 	TileMapping *BaseMapping = &(MainGameState.Graphics.TileLayers[0]);
-	TileFilenames.push_back("WhiteTile.bmp");
-	TileFilenames.push_back("GrayTile.bmp");
+	TileFilenames.push_back("WhiteTile.png");
+	TileFilenames.push_back("GrayTile.png");
 	BaseMapping->SizeX = 15;
 	BaseMapping->SizeY = 10;
 	BaseMapping->Camera.TileX = 0;
@@ -28,7 +28,7 @@ bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileF
 	mySprite.Position.TileY = 5;
 	mySprite.Position.SubX = 0;
 	mySprite.Position.SubY = 0;
-	TileFilenames.push_back("MainSprite.bmp");
+	TileFilenames.push_back("TestSprite.png");
 	MainGameState.Graphics.AllSprites.push_back(mySprite);
 
 	MainGameState.Graphics.GraphicsRefreshRequired = true;

@@ -6,7 +6,7 @@ Status:
 [X]-(    MyName): = Verified, closed
 
 Pre-release v2:
-[C]-(    Happel):   Read from png images
+[X]-(    Happel):   Read from png images
 [I]-(    Happel):   Read from xml files
 [I]-(    Happel):   Read from ogg vorbis music files
 [ ]-(    Happel):   Incorporate scrolling map (ground layer only)
