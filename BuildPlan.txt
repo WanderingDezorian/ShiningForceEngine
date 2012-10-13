@@ -5,15 +5,10 @@ Status:
 [C]-(    MyName): = Complete, to be verified
 [X]-(    MyName): = Verified, closed
 
-Pre-release v1:
-[X]-(    Happel):   Game has simple start-screen
-[X]-(    Happel):   Game has simple map (checkerboard tiles, no scrolling)
-[X]-(    Happel):   Demonstrate graphics works
-[X]-(    Happel):   Demonstrate keyboard control works
 Pre-release v2:
-[ ]-(    Happel):   Read from png images
-[ ]-(    Happel):   Read from xml files
-[ ]-(    Happel):   Read from ogg vorbis music files
+[C]-(    Happel):   Read from png images
+[I]-(    Happel):   Read from xml files
+[I]-(    Happel):   Read from ogg vorbis music files
 [ ]-(    Happel):   Incorporate scrolling map (ground layer only)
 [ ]-(    Happel):   Incorporate simple walking animations (ground and sprite layer only)
 [ ]-(    Happel):   Use tiled map using loaded images
