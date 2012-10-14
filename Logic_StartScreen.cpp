@@ -18,6 +18,8 @@ bool Initialize_StartScreen(GameState &MainGameState, std::vector<std::string> &
 	MainGameState.Graphics.SpecialBuffers[1].SetEnable(false);
 	MainGameState.MinorTicUpdate = Logic_MinorTic_StartScreen;
 	MainGameState.MajorTicUpdate = Logic_MajorTic_StartScreen;
+	MainGameState.Music.SetBgm("Opening.ogg");
+	MainGameState.Music.Play();
 	return true;
 }
 

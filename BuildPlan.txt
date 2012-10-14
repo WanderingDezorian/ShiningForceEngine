@@ -8,13 +8,13 @@ Status:
 Pre-release v2:
 [X]-(    Happel):   Read from png images
 [I]-(    Happel):   Read from xml files
-[I]-(    Happel):   Read from ogg vorbis music files
+[X]-(    Happel):   Read from ogg vorbis music files
 [ ]-(    Happel):   Incorporate scrolling map (ground layer only)
 [ ]-(    Happel):   Incorporate simple walking animations (ground and sprite layer only)
 [ ]-(    Happel):   Use tiled map using loaded images
 [ ]-(    Happel):   Use "blocks" to prevent movement in key areas
 [ ]-(    Happel):   Demonstrate transition to new maps- use a simple overworld and two towns.
-[ ]-(    Happel):   Add background music support
+[X]-(    Happel):   Add background music support
 Pre-release v3:
 * Incorporate entry into simple "battle"- for now, use a simple map, win by walking over the single "enemy"
 * Add NPCs to maps. NPCs should move, but do not need animations yet. Demonstrate fixed position, path following, and brownian motion profiles. NPCs should block player motion, and should not be able to walk on blocked squares.

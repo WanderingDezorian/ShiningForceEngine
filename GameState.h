@@ -3,6 +3,7 @@
 
 #include "GraphicsCore.h"
 #include "InterfaceCore.h"
+#include "MusicCore.h"
 #include <string>
 
 struct GameState;
@@ -26,6 +27,7 @@ struct GameState{
 	GameLogicFunction MajorTicUpdate;
 	// Here is the interface data
 	InterfaceCore Interface;
+	MusicCore Music;
 	// Here is the graphical data
 	GraphicalData Graphics;
 

@@ -34,6 +34,9 @@ bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileF
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.MinorTicUpdate = Logic_MinorTic_Battle;
 	MainGameState.MajorTicUpdate = Logic_MajorTic_Battle;
+
+	MainGameState.Music.SetBgm("Map1.ogg");
+	MainGameState.Music.Play();
 	return true;
 }
 
@@ -54,9 +57,13 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 		MainGameState.Graphics.AllSprites[0].Position.TileX--;
 	else if(Buttons & InterfaceCore::KEY_RIGHT)
 		MainGameState.Graphics.AllSprites[0].Position.TileX++;
+	else if(Buttons & InterfaceCore::KEY_OK)
+		MainGameState.Music.PushBgm("Attack.ogg");
+	else if(Buttons & InterfaceCore::KEY_CANCEL)
+		MainGameState.Music.PopBgm();
 	if(Buttons & (InterfaceCore::KEY_RIGHT | InterfaceCore::KEY_LEFT | InterfaceCore::KEY_UP | InterfaceCore::KEY_DOWN)){
 		MainGameState.Graphics.GraphicsRefreshRequired = true;
-		MainGameState.FramesUntilLowRate = 0;
+		MainGameState.FramesUntilLowRate = 5;
 	} else
 		MainGameState.FramesUntilLowRate = 0;
 	return true;

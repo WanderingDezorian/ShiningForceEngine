@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../InterfaceCore.cpp \
 ../Logic_Battle.cpp \
 ../Logic_StartScreen.cpp \
+../MusicCore.cpp \
 ../ResourceCore.cpp \
 ../main.cpp 
 
@@ -16,6 +17,7 @@ OBJS += \
 ./InterfaceCore.o \
 ./Logic_Battle.o \
 ./Logic_StartScreen.o \
+./MusicCore.o \
 ./ResourceCore.o \
 ./main.o 
 
@@ -24,6 +26,7 @@ CPP_DEPS += \
 ./InterfaceCore.d \
 ./Logic_Battle.d \
 ./Logic_StartScreen.d \
+./MusicCore.d \
 ./ResourceCore.d \
 ./main.d 
 

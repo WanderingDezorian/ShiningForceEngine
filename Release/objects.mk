@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lSDL -lpng
+LIBS := -lSDL -lvorbisfile -lpng
 

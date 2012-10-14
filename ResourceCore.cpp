@@ -88,10 +88,10 @@ SDL_Surface* LoadPng(const char* Filename){
 	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) // grayscale 2,4 -> rgba
 		png_set_tRNS_to_alpha(png_ptr);
 	else if (color_type == PNG_COLOR_TYPE_RGB ||	color_type == PNG_COLOR_TYPE_GRAY)
-#ifdef WORDS_BIGENDIAN
-		png_set_add_alpha(png_ptr, 255, PNG_FILLER_AFTER);
-#else
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 		png_set_add_alpha(png_ptr, 255, PNG_FILLER_BEFORE);
+#else
+		png_set_add_alpha(png_ptr, 255, PNG_FILLER_AFTER);
 #endif
 	else
 		png_set_swap_alpha(png_ptr);
@@ -99,7 +99,7 @@ SDL_Surface* LoadPng(const char* Filename){
 		png_set_strip_16(png_ptr); // Bitdepth 16 -> Bitdepth 8
 	if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(png_ptr);
-#ifndef WORDS_BIGENDIAN
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 	png_set_bgr(png_ptr); // I think this is a low-endian/high-endian swap issue.  Images need to be ABGR.
 #endif
 

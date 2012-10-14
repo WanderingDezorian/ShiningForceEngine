@@ -18,6 +18,7 @@
 #include "main.h"
 #include "GraphicsCore.h"
 #include "InterfaceCore.h"
+#include <vorbis/vorbisfile.h>
 #include "GameState.h"
 using namespace std;
 
