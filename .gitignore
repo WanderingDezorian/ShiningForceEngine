@@ -5,3 +5,7 @@
 *.png
 *.gif
 *.ogg
+.cproject
+.project
+Debug/
+Release/
