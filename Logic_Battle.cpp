@@ -1,11 +1,12 @@
 #include "main.h"
+#include "ResourceCore.h"
 
-bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileFilenames){
-	MainGameState.Graphics.TileLayers.resize(1);
-	TileMapping *BaseMapping = &(MainGameState.Graphics.TileLayers[0]);
-	TileFilenames.push_back("WhiteTile.png");
-	TileFilenames.push_back("GrayTile.png");
-	BaseMapping->SizeX = 15;
+bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
+//	MainGameState.Graphics.TileLayers.resize(1);
+//	TileMapping *BaseMapping = &(MainGameState.Graphics.TileLayers[0]);
+//	TileFilenames.push_back("WhiteTile.png");
+//	TileFilenames.push_back("GrayTile.png");
+/*	BaseMapping->SizeX = 15;
 	BaseMapping->SizeY = 10;
 	BaseMapping->Camera.TileX = 0;
 	BaseMapping->Camera.TileY = 0;
@@ -16,9 +17,10 @@ bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileF
 	for(int x = 0; x < 15; x++)
 		for(int y = 0; y < 10; y++)
 			BaseMapping->TileValues[x + BaseMapping->SizeX * y] = (x & 0x1) ^ (y & 0x1);
-
+*/
+	LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
-	Sprite mySprite;
+/*	Sprite mySprite;
 	mySprite.RootBufferOffset = 2;
 	mySprite.OrientationBufferOffset = 0;
 	mySprite.OrientationBufferSize = 1;
@@ -29,7 +31,7 @@ bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileF
 	mySprite.Position.SubX = 0;
 	mySprite.Position.SubY = 0;
 	TileFilenames.push_back("TestSprite.png");
-	MainGameState.Graphics.AllSprites.push_back(mySprite);
+	MainGameState.Graphics.AllSprites.push_back(mySprite);*/
 
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.MinorTicUpdate = Logic_MinorTic_Battle;

@@ -3,13 +3,15 @@
 
 #include "GameState.h"
 
+// TODO:  Add an Exit function
+
 void AbortGame(GameState &MainGameState, const char* Message = 0);
 
-bool Initialize_StartScreen(GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_Town(GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_Battle(GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_Ending(GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_ExitProgram(GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Town(GraphicsCore &GCore,GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_Ending(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
 
 bool Logic_MinorTic_StartScreen(GameState &MainGameState);
 bool Logic_MinorTic_Town(GameState &MainGameState);

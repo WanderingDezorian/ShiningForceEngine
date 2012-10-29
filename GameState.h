@@ -9,7 +9,7 @@
 struct GameState;
 
 typedef bool (*GameLogicFunction) (GameState &MainGameState);
-typedef bool (*ModeInitFunction) (GameState &MainGameState, std::vector<std::string> &TileFilenames);
+typedef bool (*ModeInitFunction) (GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
 
 struct GameState{
 	enum TypeMainGameMode{

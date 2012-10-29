@@ -18,6 +18,7 @@
 #include "main.h"
 #include "GraphicsCore.h"
 #include "InterfaceCore.h"
+#include "ResourceCore.h"
 #include <vorbis/vorbisfile.h>
 #include "GameState.h"
 using namespace std;
@@ -57,6 +58,12 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
+	// Validate manifest
+	if(!InitializeResources("TestMap1.tmx", myGraphicsCore, myGameState.Graphics)){
+		cerr << "Failed to initialize resource pool.  Verify resource files and retry.  Aborting." << endl;
+		return -1;
+	}
+
 	myGameState.MainGameMode = GameState::MODE_STARTSCREEN;
 	myGameState.InitializeNewMode = true;
 	myGameState.Graphics.GraphicsFlipRequired = false;
@@ -79,12 +86,13 @@ int main(int argc, char** argv){
 			myGameState.Graphics.Reset();
 			myGameState.FramesUntilLowRate = 0; // Force a major update this turn, unless overridden
 			std::vector<std::string> TileFilenames;
-			if(myGameState.InitializeFunction(myGameState,TileFilenames))
+			if(myGameState.InitializeFunction(myGraphicsCore, myGameState,TileFilenames))
 				myGameState.InitializeFunction = 0;
 			else
 				AbortGame(myGameState,"Failed to initialize new mode.  Aborting program.");
-			if(!myGraphicsCore.LoadTileBuffer(TileFilenames))
-				AbortGame(myGameState,"Failed to load required tiles.  Aborting program.");
+			// TODO:  Come up with better way to initialize
+//			if(!myGraphicsCore.LoadTileBuffer(TileFilenames))
+//				AbortGame(myGameState,"Failed to load required tiles.  Aborting program.");
 		} // if(myGameState.InitializeNewMode)
 		myGameState.MinorTicUpdate(myGameState);
 		if(myGameState.FramesUntilLowRate)

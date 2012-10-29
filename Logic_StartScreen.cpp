@@ -7,7 +7,8 @@ void AbortGame(GameState &MainGameState, const char* Message){
 	MainGameState.InitializeFunction = Initialize_ExitProgram;
 }
 
-bool Initialize_StartScreen(GameState &MainGameState, std::vector<std::string> &TileFilenames){
+#include "ResourceCore.h"
+bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
 	MainGameState.Graphics.SpecialBuffers.resize(2);
 	if(!MainGameState.Graphics.SpecialBuffers[0].Load("TitleFrame1.bmp"))
 		return false;
@@ -47,7 +48,7 @@ bool Logic_MajorTic_StartScreen(GameState &MainGameState){
 	return true;
 }
 
-bool Initialize_ExitProgram(GameState &MainGameState, std::vector<std::string> &TileFilenames){
+bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
 	MainGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
 	return true;
 }

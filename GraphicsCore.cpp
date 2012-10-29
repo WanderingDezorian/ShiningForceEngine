@@ -2,7 +2,9 @@
 #include "GraphicsCore.h"
 #include "ResourceCore.h"
 
-GraphicsCore::GraphicsCore() : MainWindow(0), TileBuffer(0){
+unsigned int TileMapping::MaxBufferSize = 0;
+
+GraphicsCore::GraphicsCore() : MainWindow(0), TileBuffer(0), TileBufferSize(0){
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
 		return;
 	MainWindow = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -41,22 +43,19 @@ bool GraphicsCore::FlipBuffer(){
 
 bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 	// Draw tile layers below sprite layer
-	std::vector<TileMapping>::const_iterator iSpriteLayer;
-	if(CurrentState.SpriteLayerDepth > CurrentState.TileLayers.size())
-		iSpriteLayer = CurrentState.TileLayers.end();
-	else
-		iSpriteLayer = CurrentState.TileLayers.begin() + CurrentState.SpriteLayerDepth;
+	const TileMapping* iSpriteLayer = CurrentState.TileLayers + CurrentState.SpriteLayerDepth;
+	if(iSpriteLayer > CurrentState.TileLayersEnd)
+		iSpriteLayer = CurrentState.TileLayersEnd;
 	CameraStruct SpriteLayerPosition = {0};
-	for(std::vector<TileMapping>::const_iterator iLayer = CurrentState.TileLayers.begin(); iLayer < iSpriteLayer; iLayer++){
+	for(const TileMapping* iLayer = CurrentState.TileLayers; iLayer < iSpriteLayer; iLayer++){
 		SpriteLayerPosition = iLayer->Camera;
 		int Y, yEnd;
 		SDL_Rect TempDest;
-		const unsigned int* TileMapBase = &(iLayer->TileValues.at(0));
 		for(Y = iLayer->Camera.TileY, yEnd = Y + 11; Y < yEnd; Y++){
 			DestRect.y = 24 * Y -iLayer->Camera.SubY;
 			DestRect.x = -iLayer->Camera.SubX;
 			const unsigned int *iTile, *iTileEnd;
-			for(iTile = TileMapBase + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
+			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
 				if(*iTile != TileMapping::NOT_A_TILE){
 					TileRect.x = *iTile * 24;
 					TempDest = DestRect;
@@ -79,15 +78,14 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		}
 	}
 	// Draw tile layers above sprite layer
-	for(std::vector<TileMapping>::const_iterator iLayer = iSpriteLayer; iLayer < CurrentState.TileLayers.end(); iLayer++){
+	for(const TileMapping* iLayer = iSpriteLayer; iLayer < CurrentState.TileLayersEnd; iLayer++){
 		int Y, yEnd;
 		SDL_Rect TempDest;
-		const unsigned int* TileMapBase = &(iLayer->TileValues.at(0));
 		for(Y = iLayer->Camera.TileY, yEnd = Y + 11; Y < yEnd; Y++){
 			DestRect.y = 24 * Y -iLayer->Camera.SubY;
 			DestRect.x = -iLayer->Camera.SubX;
 			const unsigned int *iTile, *iTileEnd;
-			for(iTile = TileMapBase + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
+			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + iLayer->Camera.TileX, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
 				if(*iTile != TileMapping::NOT_A_TILE){
 					TileRect.x = *iTile * 24;
 					TempDest = DestRect;
@@ -132,5 +130,13 @@ bool GraphicsCore::LoadTileBuffer(const std::vector<std::string> &Filenames){
 		SDL_BlitSurface(Buffer,&DestRect,TileBuffer,&TileRect);
 		SDL_FreeSurface(Buffer);
 	}
+	return true;
+}
+
+bool GraphicsCore::LoadTileBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){
+	DestRect.x = X;
+	DestRect.y = Y;
+	TileRect.x = DestSlot*24;
+	SDL_BlitSurface(LoadFrom,&DestRect,TileBuffer,&TileRect);
 	return true;
 }
