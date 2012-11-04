@@ -4,10 +4,10 @@
 // Author:  Sean Happel
 //
 #define VERSION_MAJOR      0 // Still in pre-release
-#define VERSION_MINOR      1 // Pre-release version 1
+#define VERSION_MINOR      2 // Pre-release version 2
 #define VERSION_REVISION   0 // First edit of this revision
 //
-#define BUILD_IS_RELEASED  true // Candidate build
+#define BUILD_IS_RELEASED  false // Candidate build
 //
 // See Changelog.txt for more details
 //

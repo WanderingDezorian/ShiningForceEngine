@@ -5,13 +5,82 @@
 #include <vector>
 #include <string>
 
-struct CameraStruct{
-	unsigned int TileX, TileY, SubX, SubY;
-	void Reset(){ TileX = 0; TileY = 0; SubX = 0; SubY = 0; }
+struct Point{
+	unsigned int X,Y; // TODO:  Does TileX/Y serve any purpose?
+	Point() : X(0), Y(0) {}
+	Point(const unsigned int &Val) : X(Val), Y(Val) {}
+	Point(const unsigned int &InitialX, const unsigned int &InitialY) : X(InitialX), Y(InitialY) {}
+	Point& operator=(const Point &Val){ X = Val.X; Y = Val.Y; return *this; }
+	Point& operator=(const unsigned int &Val){ X = Val; Y = Val; return *this; }
+
+	Point operator+(const Point &Val)const{ return Point(X+Val.X,Y+Val.Y); }
+	Point operator-(const Point &Val)const{ return Point(X-Val.X,Y-Val.Y); }
+	Point operator*(const Point &Val)const{ return Point(X*Val.X,Y*Val.Y); }
+	Point operator/(const Point &Val)const{ return Point(X/Val.X,Y/Val.Y); }
+	Point operator+(const unsigned int &Val)const{ return Point(X+Val,Y+Val); }
+	Point operator-(const unsigned int &Val)const{ return Point(X-Val,Y-Val); }
+	Point operator*(const unsigned int &Val)const{ return Point(X*Val,Y*Val); }
+	Point operator/(const unsigned int &Val)const{ return Point(X/Val,Y/Val); }
+
+	Point& operator+=(const Point &Val){ X += Val.X; Y += Val.Y; return *this; }
+	Point& operator-=(const Point &Val){ X -= Val.X; Y -= Val.Y; return *this; }
+	Point& operator*=(const Point &Val){ X *= Val.X; Y *= Val.Y; return *this; }
+	Point& operator/=(const Point &Val){ X /= Val.X; Y /= Val.Y; return *this; }
+	Point& operator+=(const unsigned int &Val){ X += Val; Y += Val; return *this; }
+	Point& operator-=(const unsigned int &Val){ X -= Val; Y -= Val; return *this; }
+	Point& operator*=(const unsigned int &Val){ X *= Val; Y *= Val; return *this; }
+	Point& operator/=(const unsigned int &Val){ X /= Val; Y /= Val; return *this; }
+
+	Point min(const Point &Val)const{ return Point( (X < Val.X ? X : Val.X), (Y < Val.Y ? Y : Val.Y) ); }
+	Point min(const unsigned int &Val)const{ return Point( (X < Val ? X : Val), (Y < Val ? Y : Val) ); }
+	Point& minEq(const Point &Val){ if(Val.X < X) X = Val.X; if(Val.Y < Y) Y = Val.Y; return *this; }
+	Point& minEq(const unsigned int &Val){ if(Val < X) X = Val; if(Val < Y) Y = Val; return *this; }
+
+	Point max(const Point &Val)const{ return Point( (X > Val.X ? X : Val.X), (Y > Val.Y ? Y : Val.Y) ); }
+	Point max(const unsigned int &Val)const{ return Point( (X > Val ? X : Val), (Y > Val ? Y : Val) ); }
+	Point& maxEq(const Point &Val){ if(Val.X > X) X = Val.X; if(Val.Y > Y) Y = Val.Y; return *this; }
+	Point& maxEq(const unsigned int &Val){ if(Val > X) X = Val; if(Val > Y) Y = Val; return *this; }
+};
+
+template<int BlockSize> struct BlockBuffer{
+	SDL_Surface* Surface;
+	unsigned int Size;
+public:
+	BlockBuffer() : Surface(0), Size(0) {};
+	~BlockBuffer(){ if(Surface) SDL_FreeSurface(Surface); }
+	bool Load(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){
+		SDL_Rect SourceRect;
+		SourceRect.h = BlockSize;
+		SourceRect.w = BlockSize;
+		SourceRect.x = X;
+		SourceRect.y = Y;
+		SDL_Rect DestRect;
+		DestRect.h = BlockSize;
+		DestRect.w = BlockSize;
+		DestRect.y = 0;
+		DestRect.x = DestSlot*BlockSize;
+		SDL_BlitSurface(LoadFrom,&SourceRect,Surface,&DestRect);
+		return true;
+	}
+	bool Allocate(const SDL_Surface* MainWindow, unsigned int NewSize){
+		if(NewSize > Size){
+			if(Surface)
+				SDL_FreeSurface(Surface);
+			Surface = SDL_CreateRGBSurface(
+					(SDL_HWSURFACE & MainWindow->flags), BlockSize * NewSize, BlockSize, MainWindow->format->BitsPerPixel,
+					MainWindow->format->Rmask, MainWindow->format->Gmask, MainWindow->format->Bmask, MainWindow->format->Amask);
+			if(Surface)
+				Size = NewSize;
+			else
+				Size = 0;
+			return Size != 0;
+		}
+		return true;
+	}
 };
 
 struct Sprite{
-	CameraStruct Position;
+	Point Position;
 	unsigned int RootBufferOffset;
 	unsigned int OrientationBufferOffset;
 	unsigned int OrientationBufferSize;
@@ -33,9 +102,12 @@ struct TileMapping{ // This is a layer
 	unsigned int SizeY;
 	unsigned int* TileValues;
 	unsigned int MainBufferOffset; //Offset to the first tile used in this map
-	CameraStruct Camera;
+	Point MaxCamera;
+	Point ScaleNumerator;
+	Point ScaleDenominator;
+	bool WrapX, WrapY;
 	unsigned int TileValueBufferSize;
-	TileMapping(): SizeX(0), SizeY(0), TileValues(0), MainBufferOffset(0), TileValueBufferSize(0) {};
+	TileMapping(): SizeX(0), SizeY(0), TileValues(0), MainBufferOffset(0), TileValueBufferSize(0), WrapX(false), WrapY(false) {};
 	~TileMapping(){ if(TileValues) delete[] TileValues; }
 	static unsigned int MaxBufferSize;
 	bool Allocate(){ return Allocate(SizeX * SizeY); }
@@ -72,10 +144,12 @@ struct GraphicalData{
 	bool GraphicsFlipRequired;
 	TileMapping* TileLayers; // 0th layer drawn first
 	const TileMapping* TileLayersEnd;
+	const TileMapping* TileLayersBufferEnd;
 	unsigned int NumTileLayers;
 	std::vector<Sprite> AllSprites;
 	std::vector<SpecialtyBuffer> SpecialBuffers;
 	unsigned int SpriteLayerDepth; // Depth i means sprite layer is drawn before layer i.
+	Point MasterCamera;
 
 	GraphicalData() : TileLayers(0), NumTileLayers(0), TileLayersEnd(0), SpriteLayerDepth(0), GraphicsRefreshRequired(0), GraphicsFlipRequired(0) {};
 	~GraphicalData(){ if(TileLayers) delete[] TileLayers; }
@@ -86,25 +160,29 @@ struct GraphicalData{
 		else
 			TileLayers = 0;
 		NumTileLayers = NewNumLayers;
-		TileLayersEnd = TileLayers + NumTileLayers;
+		TileLayersBufferEnd = TileLayers + NumTileLayers;
 	}
 	void Reset(){
 		GraphicsRefreshRequired = true;
 		GraphicsFlipRequired = false;
-		for(TileMapping* iLayer = TileLayers; iLayer < TileLayersEnd; iLayer++){
-			iLayer->Camera.Reset();
+		for(TileMapping* iLayer = TileLayers; iLayer < TileLayersBufferEnd; iLayer++){
+			iLayer->MaxCamera = 0xFFFFFFFF;
+			iLayer->ScaleNumerator = 1;
+			iLayer->ScaleDenominator = 1;
 			iLayer->SizeX = 0;
 		}
 		AllSprites.clear();
 		SpecialBuffers.clear();
+		MasterCamera = 0;
+		TileLayersEnd = TileLayers;
 	}
 };
 
 class GraphicsCore{
 	private:
 		SDL_Surface* MainWindow;
-		SDL_Surface* TileBuffer; // TODO:  Should this be moved to Graphics data?
-		unsigned int TileBufferSize;
+		BlockBuffer<24> TileBuffer;
+		BlockBuffer<24> SpriteBuffer;
 		SDL_Rect TileRect;
 		SDL_Rect DestRect;
 		//SDL_Renderer* Renderer;
@@ -113,9 +191,10 @@ class GraphicsCore{
 		GraphicsCore();
 		~GraphicsCore();
 
-		bool AllocateTileBuffer(unsigned int Size);
-		bool LoadTileBuffer(const std::vector<std::string> &Filenames);
-		bool LoadTileBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y);
+		bool AllocateTileBuffer(unsigned int Size){ return TileBuffer.Allocate(MainWindow,Size); }
+		bool AllocateSpriteBuffer(unsigned int Size){ return SpriteBuffer.Allocate(MainWindow,Size); }
+		bool LoadTileBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){ return TileBuffer.Load(DestSlot,LoadFrom,X,Y); }
+		bool LoadSpriteBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){ return SpriteBuffer.Load(DestSlot,LoadFrom,X,Y); }
 		bool FlipBuffer();
 		bool PrepareNextFrame(const GraphicalData &CurrentState);
 		SDL_Surface* GetMainWindow(){ return MainWindow; }

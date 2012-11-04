@@ -454,5 +454,9 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GraphicalD
 	}catch(...){
 		return false;
 	}
+
+	// TODO:  Determine maximum number of sprites
+	if(!Core.AllocateSpriteBuffer(8))
+		return false;
 	return true;
 }

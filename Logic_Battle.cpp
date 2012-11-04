@@ -18,20 +18,17 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 		for(int y = 0; y < 10; y++)
 			BaseMapping->TileValues[x + BaseMapping->SizeX * y] = (x & 0x1) ^ (y & 0x1);
 */
-	LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
+	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
-/*	Sprite mySprite;
-	mySprite.RootBufferOffset = 2;
+	Sprite mySprite;
+	mySprite.RootBufferOffset = 0;
 	mySprite.OrientationBufferOffset = 0;
-	mySprite.OrientationBufferSize = 1;
+	mySprite.OrientationBufferSize = 2;
 	mySprite.CurrentOffset = 0;
-	mySprite.UpdatePattern = Sprite::UPDATE_PAUSED;
-	mySprite.Position.TileX = 7;
-	mySprite.Position.TileY = 5;
-	mySprite.Position.SubX = 0;
-	mySprite.Position.SubY = 0;
-	TileFilenames.push_back("TestSprite.png");
-	MainGameState.Graphics.AllSprites.push_back(mySprite);*/
+	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
+	mySprite.Position = Point(7,5) * 24;
+//	TileFilenames.push_back("TestSprite.png");
+	MainGameState.Graphics.AllSprites.push_back(mySprite);
 
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.MinorTicUpdate = Logic_MinorTic_Battle;
@@ -52,13 +49,13 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 	if(Buttons & InterfaceCore::KEY_EXIT)
 		AbortGame(MainGameState);
 	else if(Buttons & InterfaceCore::KEY_UP)
-		MainGameState.Graphics.AllSprites[0].Position.TileY--;
+		MainGameState.Graphics.AllSprites[0].Position.Y--;
 	else if(Buttons & InterfaceCore::KEY_DOWN)
-		MainGameState.Graphics.AllSprites[0].Position.TileY++;
+		MainGameState.Graphics.AllSprites[0].Position.Y++;
 	else if(Buttons & InterfaceCore::KEY_LEFT)
-		MainGameState.Graphics.AllSprites[0].Position.TileX--;
+		MainGameState.Graphics.AllSprites[0].Position.X--;
 	else if(Buttons & InterfaceCore::KEY_RIGHT)
-		MainGameState.Graphics.AllSprites[0].Position.TileX++;
+		MainGameState.Graphics.AllSprites[0].Position.X++;
 	else if(Buttons & InterfaceCore::KEY_OK)
 		MainGameState.Music.PushBgm("Attack.ogg");
 	else if(Buttons & InterfaceCore::KEY_CANCEL)
