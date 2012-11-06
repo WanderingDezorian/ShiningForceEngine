@@ -13,6 +13,7 @@ struct Point{
 	Point& operator=(const Point &Val){ X = Val.X; Y = Val.Y; return *this; }
 	Point& operator=(const unsigned int &Val){ X = Val; Y = Val; return *this; }
 
+	bool operator==(const Point &Val){ return (X == Val.X) && (Y == Val.Y); }
 	Point operator+(const Point &Val)const{ return Point(X+Val.X,Y+Val.Y); }
 	Point operator-(const Point &Val)const{ return Point(X-Val.X,Y-Val.Y); }
 	Point operator*(const Point &Val)const{ return Point(X*Val.X,Y*Val.Y); }
@@ -40,6 +41,17 @@ struct Point{
 	Point max(const unsigned int &Val)const{ return Point( (X > Val ? X : Val), (Y > Val ? Y : Val) ); }
 	Point& maxEq(const Point &Val){ if(Val.X > X) X = Val.X; if(Val.Y > Y) Y = Val.Y; return *this; }
 	Point& maxEq(const unsigned int &Val){ if(Val > X) X = Val; if(Val > Y) Y = Val; return *this; }
+
+	void MoveTowards(const Point &Val, const unsigned int Speed = 1){
+		if(Val.X > X)
+			X = (X + Speed > Val.X) ? Val.X : X + Speed;
+		else if(Val.X < X)
+			X = (X - Speed < Val.X) ? Val.X : X - Speed;
+		if(Val.Y > Y)
+			Y = (Y + Speed > Val.Y) ? Val.Y : Y + Speed;
+		else if(Val.Y < Y)
+			Y = (Y - Speed < Val.Y) ? Val.Y : Y - Speed;
+	}
 };
 
 template<int BlockSize> struct BlockBuffer{
@@ -94,6 +106,7 @@ struct Sprite{
 		UPDATE_PAUSED,
 		UPDATE_INVISIBLE
 	} UpdatePattern;
+	void Update();
 };
 
 struct TileMapping{ // This is a layer
@@ -150,8 +163,9 @@ struct GraphicalData{
 	std::vector<SpecialtyBuffer> SpecialBuffers;
 	unsigned int SpriteLayerDepth; // Depth i means sprite layer is drawn before layer i.
 	Point MasterCamera;
+	Point MasterMapSizeInTiles;
 
-	GraphicalData() : TileLayers(0), NumTileLayers(0), TileLayersEnd(0), SpriteLayerDepth(0), GraphicsRefreshRequired(0), GraphicsFlipRequired(0) {};
+	GraphicalData() : AllSprites(), SpecialBuffers(), TileLayers(0), NumTileLayers(0), TileLayersEnd(0), SpriteLayerDepth(0), GraphicsRefreshRequired(0), GraphicsFlipRequired(0) {};
 	~GraphicalData(){ if(TileLayers) delete[] TileLayers; }
 	void AllocateTileLayers(unsigned int NewNumLayers){
 		if(TileLayers) delete[] TileLayers;
@@ -192,7 +206,13 @@ class GraphicsCore{
 		~GraphicsCore();
 
 		bool AllocateTileBuffer(unsigned int Size){ return TileBuffer.Allocate(MainWindow,Size); }
-		bool AllocateSpriteBuffer(unsigned int Size){ return SpriteBuffer.Allocate(MainWindow,Size); }
+		bool AllocateSpriteBuffer(unsigned int Size){
+			if(!SpriteBuffer.Allocate(MainWindow,Size))
+				return false;
+			SDL_SetColorKey(SpriteBuffer.Surface,SDL_SRCCOLORKEY | SDL_RLEACCEL,
+					SDL_MapRGB(SpriteBuffer.Surface->format,0,0xFF,0));
+			return true;
+		}
 		bool LoadTileBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){ return TileBuffer.Load(DestSlot,LoadFrom,X,Y); }
 		bool LoadSpriteBuffer(unsigned int DestSlot, SDL_Surface* LoadFrom, Sint16 X, Sint16 Y){ return SpriteBuffer.Load(DestSlot,LoadFrom,X,Y); }
 		bool FlipBuffer();

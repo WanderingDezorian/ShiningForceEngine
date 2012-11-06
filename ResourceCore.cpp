@@ -14,25 +14,6 @@
 template<class T> inline T MAX(const T &A, const T &B){ return (A > B) ? A : B; }
 template<class T> inline void StoreMax(T &A, const T &B){ if(B > A) A = B; }
 
-class FileGuard{
-	FILE *myPointer;
-public:
-	FileGuard(FILE *ToGuard = 0) : myPointer(ToGuard){}
-	~FileGuard(){ if(myPointer) fclose(myPointer); }
-	void GuardFile(FILE* ToGuard){ myPointer = ToGuard; }
-	void StopGuarding(){ myPointer = 0; }
-};
-
-class SurfaceGuard{
-	SDL_Surface* myPointer;
-public:
-	SurfaceGuard(SDL_Surface *ToGuard = 0) : myPointer(ToGuard){}
-	~SurfaceGuard(){ if(myPointer) SDL_FreeSurface(myPointer); }
-	void GuardSurface(SDL_Surface* ToGuard){ myPointer = ToGuard; }
-	void StopGuarding(){ myPointer = 0; }
-	void Delete(){ if(myPointer) SDL_FreeSurface(myPointer); myPointer = 0; }
-};
-
 class PngGuard{
 	png_struct *PngStruct;
 	png_info *StartInfo;

@@ -2,24 +2,14 @@
 #include "ResourceCore.h"
 
 bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
-//	MainGameState.Graphics.TileLayers.resize(1);
-//	TileMapping *BaseMapping = &(MainGameState.Graphics.TileLayers[0]);
-//	TileFilenames.push_back("WhiteTile.png");
-//	TileFilenames.push_back("GrayTile.png");
-/*	BaseMapping->SizeX = 15;
-	BaseMapping->SizeY = 10;
-	BaseMapping->Camera.TileX = 0;
-	BaseMapping->Camera.TileY = 0;
-	BaseMapping->Camera.SubX = 20;
-	BaseMapping->Camera.SubY = 0;
-	BaseMapping->MainBufferOffset = 0;
-	BaseMapping->TileValues.resize(10*15);
-	for(int x = 0; x < 15; x++)
-		for(int y = 0; y < 10; y++)
-			BaseMapping->TileValues[x + BaseMapping->SizeX * y] = (x & 0x1) ^ (y & 0x1);
-*/
+	//////// Load tiles
 	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
+	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
+	// TODO:  Do this elsewhere
+	for(TileMapping* iLayer = MainGameState.Graphics.TileLayers; iLayer < MainGameState.Graphics.TileLayersEnd; iLayer++)
+		MainGameState.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
+	//////// Load sprites
 	Sprite mySprite;
 	mySprite.RootBufferOffset = 0;
 	mySprite.OrientationBufferOffset = 0;
@@ -27,12 +17,23 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 	mySprite.CurrentOffset = 0;
 	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
 	mySprite.Position = Point(7,5) * 24;
-//	TileFilenames.push_back("TestSprite.png");
 	MainGameState.Graphics.AllSprites.push_back(mySprite);
+	SDL_Surface* Temp = LoadPng("Noah.png");
+	SurfaceGuard GuardTemp(Temp);
+	for(int i = 0; i < 8; i++){
+		GCore.LoadSpriteBuffer(i,Temp,i*24,0);
+	}
 
+	///////// Load mobiles
+	MainGameState.Mobs.resize(1);
+	MainGameState.Mobs[0].OccupiedTile = Point(7,5);
+
+	///////// Initialize game
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.MinorTicUpdate = Logic_MinorTic_Battle;
 	MainGameState.MajorTicUpdate = Logic_MajorTic_Battle;
+	MainGameState.FramesUntilLowRate = 1;
+	MainGameState.FramesInMode = 0;
 
 	MainGameState.Music.SetBgm("Map1.ogg");
 	MainGameState.Music.Play();
@@ -40,29 +41,59 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 }
 
 bool Logic_MinorTic_Battle(GameState &MainGameState){
+	MainGameState.FramesInMode++;
+	Mob* iMob = &MainGameState.Mobs[0];
+	Sprite* iSprite = &MainGameState.Graphics.AllSprites[0];
+	Point TargetPos = iMob->OccupiedTile * 24;
+	if(iMob->Speed){
+		iSprite->Position.MoveTowards(TargetPos,iMob->Speed);
+		if(iSprite->Position == TargetPos)
+			iMob->Speed = 0;
+		MainGameState.Graphics.GraphicsRefreshRequired = true;
+	}
 	// Update sprites if needed.
+/*	if((MainGameState.FramesInMode & 0x03) == 0){
+		iSprite->Update();
+		MainGameState.Graphics.GraphicsRefreshRequired = true;
+	}*/
 	return true;
 }
 
 bool Logic_MajorTic_Battle(GameState &MainGameState){
-	unsigned char Buttons = MainGameState.Interface.GetButtonState();
-	if(Buttons & InterfaceCore::KEY_EXIT)
-		AbortGame(MainGameState);
-	else if(Buttons & InterfaceCore::KEY_UP)
-		MainGameState.Graphics.AllSprites[0].Position.Y--;
-	else if(Buttons & InterfaceCore::KEY_DOWN)
-		MainGameState.Graphics.AllSprites[0].Position.Y++;
-	else if(Buttons & InterfaceCore::KEY_LEFT)
-		MainGameState.Graphics.AllSprites[0].Position.X--;
-	else if(Buttons & InterfaceCore::KEY_RIGHT)
-		MainGameState.Graphics.AllSprites[0].Position.X++;
-	else if(Buttons & InterfaceCore::KEY_OK)
-		MainGameState.Music.PushBgm("Attack.ogg");
-	else if(Buttons & InterfaceCore::KEY_CANCEL)
-		MainGameState.Music.PopBgm();
-	if(Buttons & (InterfaceCore::KEY_RIGHT | InterfaceCore::KEY_LEFT | InterfaceCore::KEY_UP | InterfaceCore::KEY_DOWN)){
-		MainGameState.Graphics.GraphicsRefreshRequired = true;
-		MainGameState.FramesUntilLowRate = 5;
+	Mob* SelectedMob = &MainGameState.Mobs[0];
+	Sprite* SelectedSprite = &MainGameState.Graphics.AllSprites[0];
+	if(SelectedMob->Speed == 0){
+		unsigned char Buttons = MainGameState.Interface.PeekButtonState();
+		if(Buttons & InterfaceCore::KEY_EXIT)
+			AbortGame(MainGameState);
+		else if(Buttons & InterfaceCore::KEY_UP){
+			SelectedSprite->OrientationBufferOffset = 2;
+			if(SelectedMob->OccupiedTile.Y != 0)
+				SelectedMob->OccupiedTile.Y--;
+		}
+		else if(Buttons & InterfaceCore::KEY_DOWN){
+			SelectedSprite->OrientationBufferOffset = 0;
+			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1)
+				SelectedMob->OccupiedTile.Y++;
+		}
+		else if(Buttons & InterfaceCore::KEY_LEFT){
+			SelectedSprite->OrientationBufferOffset = 6;
+			if(SelectedMob->OccupiedTile.X != 0)
+				SelectedMob->OccupiedTile.X--;
+		}
+		else if(Buttons & InterfaceCore::KEY_RIGHT){
+			SelectedSprite->OrientationBufferOffset = 4;
+			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1)
+				SelectedMob->OccupiedTile.X++;
+		}
+		else if(Buttons & InterfaceCore::KEY_OK)
+			MainGameState.Music.PushBgm("Attack.ogg");
+		else if(Buttons & InterfaceCore::KEY_CANCEL)
+			MainGameState.Music.PopBgm();
+		if(Buttons & (InterfaceCore::KEY_RIGHT | InterfaceCore::KEY_LEFT | InterfaceCore::KEY_UP | InterfaceCore::KEY_DOWN)){
+			SelectedMob->Speed = 4;
+			MainGameState.FramesUntilLowRate = 5; // May be set lower if
+		}
 	} else
 		MainGameState.FramesUntilLowRate = 0;
 	return true;

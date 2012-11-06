@@ -4,6 +4,44 @@
 
 unsigned int TileMapping::MaxBufferSize = 0;
 
+void Sprite::Update(){
+	switch(UpdatePattern){
+		case UPDATE_LINEAR:
+			CurrentOffset++;
+			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize)
+				CurrentOffset = OrientationBufferOffset;
+			break;
+		case UPDATE_BACKANDFORTH_FORWARD:
+			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1){
+				CurrentOffset--;
+				UpdatePattern = UPDATE_BACKANDFORTH_BACKWARD;
+			}
+			else
+				CurrentOffset++;
+			break;
+		case UPDATE_BACKANDFORTH_BACKWARD:
+			if(CurrentOffset == OrientationBufferOffset){
+				CurrentOffset++;
+				UpdatePattern = UPDATE_BACKANDFORTH_FORWARD;
+			}
+			else
+				CurrentOffset--;
+			break;
+		case UPDATE_SINGLEPASSANDFREEZE:
+			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1)
+				UpdatePattern = UPDATE_PAUSED;
+			else
+				CurrentOffset++;
+			break;
+		case UPDATE_SINGLEPASSANDVANISH:
+			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1)
+				UpdatePattern = UPDATE_INVISIBLE;
+			else
+				CurrentOffset++;
+			break;
+	}
+}
+
 GraphicsCore::GraphicsCore() : MainWindow(0){
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
 		return;

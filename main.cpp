@@ -94,12 +94,12 @@ int main(int argc, char** argv){
 //			if(!myGraphicsCore.LoadTileBuffer(TileFilenames))
 //				AbortGame(myGameState,"Failed to load required tiles.  Aborting program.");
 		} // if(myGameState.InitializeNewMode)
-		myGameState.MinorTicUpdate(myGameState);
 		if(myGameState.FramesUntilLowRate)
 			myGameState.FramesUntilLowRate--;
 		else{
 			myGameState.MajorTicUpdate(myGameState);
 		}
+		myGameState.MinorTicUpdate(myGameState);
 		if(clock() >= NextStep)
 			cerr << "Logic overran alloted time" << endl;
 		// Wait for next frame
