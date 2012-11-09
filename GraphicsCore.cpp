@@ -8,11 +8,11 @@ void Sprite::Update(){
 	switch(UpdatePattern){
 		case UPDATE_LINEAR:
 			CurrentOffset++;
-			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize)
-				CurrentOffset = OrientationBufferOffset;
+			if(CurrentOffset == OrientationBufferSize)
+				CurrentOffset = 0;
 			break;
 		case UPDATE_BACKANDFORTH_FORWARD:
-			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1){
+			if(CurrentOffset == OrientationBufferSize - 1){
 				CurrentOffset--;
 				UpdatePattern = UPDATE_BACKANDFORTH_BACKWARD;
 			}
@@ -20,7 +20,7 @@ void Sprite::Update(){
 				CurrentOffset++;
 			break;
 		case UPDATE_BACKANDFORTH_BACKWARD:
-			if(CurrentOffset == OrientationBufferOffset){
+			if(CurrentOffset == 0){
 				CurrentOffset++;
 				UpdatePattern = UPDATE_BACKANDFORTH_FORWARD;
 			}
@@ -28,13 +28,13 @@ void Sprite::Update(){
 				CurrentOffset--;
 			break;
 		case UPDATE_SINGLEPASSANDFREEZE:
-			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1)
+			if(CurrentOffset == OrientationBufferSize - 1)
 				UpdatePattern = UPDATE_PAUSED;
 			else
 				CurrentOffset++;
 			break;
 		case UPDATE_SINGLEPASSANDVANISH:
-			if(CurrentOffset == OrientationBufferOffset + OrientationBufferSize - 1)
+			if(CurrentOffset == OrientationBufferSize - 1)
 				UpdatePattern = UPDATE_INVISIBLE;
 			else
 				CurrentOffset++;
@@ -90,8 +90,8 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		LayerSubIndex -= LayerTileIndex * 24;
 		int Y, yEnd;
 		SDL_Rect TempDest;
+		DestRect.y = -LayerSubIndex.Y;
 		for(Y = LayerTileIndex.Y, yEnd = Y + 11; Y < yEnd; Y++){
-			DestRect.y = 24 * Y -LayerSubIndex.Y;
 			DestRect.x = -LayerSubIndex.X;
 			const unsigned int *iTile, *iTileEnd;
 			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + LayerTileIndex.X, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
@@ -102,6 +102,7 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 				}
 				DestRect.x += 24;
 			}
+			DestRect.y += 24;
 		}
 	}
 	// Draw sprite layer

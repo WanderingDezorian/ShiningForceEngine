@@ -47,15 +47,16 @@ bool Logic_MinorTic_Battle(GameState &MainGameState){
 	Point TargetPos = iMob->OccupiedTile * 24;
 	if(iMob->Speed){
 		iSprite->Position.MoveTowards(TargetPos,iMob->Speed);
+		MainGameState.Graphics.MasterCamera.MoveTowards(MainGameState.Graphics.DesiredMasterCamera,iMob->Speed);
 		if(iSprite->Position == TargetPos)
 			iMob->Speed = 0;
 		MainGameState.Graphics.GraphicsRefreshRequired = true;
 	}
 	// Update sprites if needed.
-/*	if((MainGameState.FramesInMode & 0x03) == 0){
+	if((MainGameState.FramesInMode & 0x03) == 0){
 		iSprite->Update();
 		MainGameState.Graphics.GraphicsRefreshRequired = true;
-	}*/
+	}
 	return true;
 }
 
@@ -68,23 +69,37 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 			AbortGame(MainGameState);
 		else if(Buttons & InterfaceCore::KEY_UP){
 			SelectedSprite->OrientationBufferOffset = 2;
-			if(SelectedMob->OccupiedTile.Y != 0)
+			if(SelectedMob->OccupiedTile.Y != 0){
 				SelectedMob->OccupiedTile.Y--;
+				int Desired = (SelectedMob->OccupiedTile.Y - 2) * 24;
+				if((Desired < MainGameState.Graphics.MasterCamera.Y) && (Desired >= 0))
+					MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+			}
 		}
 		else if(Buttons & InterfaceCore::KEY_DOWN){
 			SelectedSprite->OrientationBufferOffset = 0;
-			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1)
+			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1){
 				SelectedMob->OccupiedTile.Y++;
+				int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * 24;
+				if((Desired > int(MainGameState.Graphics.MasterCamera.Y)) && (SelectedMob->OccupiedTile.Y < MainGameState.Graphics.MasterMapSizeInTiles.Y - 2))
+					MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+			}
 		}
 		else if(Buttons & InterfaceCore::KEY_LEFT){
 			SelectedSprite->OrientationBufferOffset = 6;
 			if(SelectedMob->OccupiedTile.X != 0)
 				SelectedMob->OccupiedTile.X--;
+			int Desired = (SelectedMob->OccupiedTile.X - 2) * 24;
+			if((Desired < MainGameState.Graphics.MasterCamera.X) && (Desired >= 0))
+				MainGameState.Graphics.DesiredMasterCamera.X = Desired;
 		}
 		else if(Buttons & InterfaceCore::KEY_RIGHT){
 			SelectedSprite->OrientationBufferOffset = 4;
 			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1)
 				SelectedMob->OccupiedTile.X++;
+			int Desired = int(SelectedMob->OccupiedTile.X * 24) + (3*24 - 320);
+			if((Desired > int(MainGameState.Graphics.MasterCamera.X)) && (SelectedMob->OccupiedTile.X < MainGameState.Graphics.MasterMapSizeInTiles.X - 2))
+				MainGameState.Graphics.DesiredMasterCamera.X = Desired;
 		}
 		else if(Buttons & InterfaceCore::KEY_OK)
 			MainGameState.Music.PushBgm("Attack.ogg");

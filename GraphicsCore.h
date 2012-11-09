@@ -163,6 +163,7 @@ struct GraphicalData{
 	std::vector<SpecialtyBuffer> SpecialBuffers;
 	unsigned int SpriteLayerDepth; // Depth i means sprite layer is drawn before layer i.
 	Point MasterCamera;
+	Point DesiredMasterCamera;
 	Point MasterMapSizeInTiles;
 
 	GraphicalData() : AllSprites(), SpecialBuffers(), TileLayers(0), NumTileLayers(0), TileLayersEnd(0), SpriteLayerDepth(0), GraphicsRefreshRequired(0), GraphicsFlipRequired(0) {};
