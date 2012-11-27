@@ -45,7 +45,7 @@ void Sprite::Update(){
 GraphicsCore::GraphicsCore() : MainWindow(0){
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
 		return;
-	MainWindow = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	MainWindow = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);// | SDL_FULLSCREEN);
 
 	TileRect.h = 24;
 	TileRect.w = 24;

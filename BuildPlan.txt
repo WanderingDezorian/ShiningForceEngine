@@ -9,8 +9,8 @@ Pre-release v2:
 [X]-(    Happel):   Read from png images
 [X]-(    Happel):   Read from xml files
 [X]-(    Happel):   Read from ogg vorbis music files
-[ ]-(    Happel):   Incorporate scrolling map (ground layer only)
-[ ]-(    Happel):   Incorporate simple walking animations (ground and sprite layer only)
+[I]-(    Happel):   Incorporate scrolling map (ground layer only)
+[X]-(    Happel):   Incorporate simple walking animations (ground and sprite layer only)
 [X]-(    Happel):   Use tiled map using loaded images
 [ ]-(    Happel):   Use "blocks" to prevent movement in key areas
 [ ]-(    Happel):   Demonstrate transition to new maps- use a simple overworld and two towns.

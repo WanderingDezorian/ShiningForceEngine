@@ -6,6 +6,7 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
 	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
+	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);
 	// TODO:  Do this elsewhere
 	for(TileMapping* iLayer = MainGameState.Graphics.TileLayers; iLayer < MainGameState.Graphics.TileLayersEnd; iLayer++)
 		MainGameState.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
@@ -70,36 +71,46 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 		else if(Buttons & InterfaceCore::KEY_UP){
 			SelectedSprite->OrientationBufferOffset = 2;
 			if(SelectedMob->OccupiedTile.Y != 0){
-				SelectedMob->OccupiedTile.Y--;
-				int Desired = (SelectedMob->OccupiedTile.Y - 2) * 24;
-				if((Desired < MainGameState.Graphics.MasterCamera.Y) && (Desired >= 0))
-					MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y - 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_DOWN) == 0){
+					SelectedMob->OccupiedTile.Y--;
+					int Desired = (SelectedMob->OccupiedTile.Y - 2) * 24;
+					if((Desired < MainGameState.Graphics.MasterCamera.Y) && (Desired >= 0))
+						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+				}
 			}
 		}
 		else if(Buttons & InterfaceCore::KEY_DOWN){
 			SelectedSprite->OrientationBufferOffset = 0;
 			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1){
-				SelectedMob->OccupiedTile.Y++;
-				int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * 24;
-				if((Desired > int(MainGameState.Graphics.MasterCamera.Y)) && (SelectedMob->OccupiedTile.Y < MainGameState.Graphics.MasterMapSizeInTiles.Y - 2))
-					MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y + 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_UP) == 0){
+					SelectedMob->OccupiedTile.Y++;
+					int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * 24;
+					if((Desired > int(MainGameState.Graphics.MasterCamera.Y)) && (SelectedMob->OccupiedTile.Y < MainGameState.Graphics.MasterMapSizeInTiles.Y - 2))
+						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+				}
 			}
 		}
 		else if(Buttons & InterfaceCore::KEY_LEFT){
 			SelectedSprite->OrientationBufferOffset = 6;
-			if(SelectedMob->OccupiedTile.X != 0)
-				SelectedMob->OccupiedTile.X--;
-			int Desired = (SelectedMob->OccupiedTile.X - 2) * 24;
-			if((Desired < MainGameState.Graphics.MasterCamera.X) && (Desired >= 0))
-				MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+			if(SelectedMob->OccupiedTile.X != 0){
+				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X - 1] & GameData::BLOCKER_MASK_RIGHT) == 0){
+					SelectedMob->OccupiedTile.X--;
+					int Desired = (SelectedMob->OccupiedTile.X - 2) * 24;
+					if((Desired < MainGameState.Graphics.MasterCamera.X) && (Desired >= 0))
+						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+				}
+			}
 		}
 		else if(Buttons & InterfaceCore::KEY_RIGHT){
 			SelectedSprite->OrientationBufferOffset = 4;
-			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1)
-				SelectedMob->OccupiedTile.X++;
-			int Desired = int(SelectedMob->OccupiedTile.X * 24) + (3*24 - 320);
-			if((Desired > int(MainGameState.Graphics.MasterCamera.X)) && (SelectedMob->OccupiedTile.X < MainGameState.Graphics.MasterMapSizeInTiles.X - 2))
-				MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1){
+				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X + 1] & GameData::BLOCKER_MASK_LEFT) == 0){
+					SelectedMob->OccupiedTile.X++;
+					int Desired = int(SelectedMob->OccupiedTile.X * 24) + (3*24 - 320);
+					if((Desired > int(MainGameState.Graphics.MasterCamera.X)) && (SelectedMob->OccupiedTile.X < MainGameState.Graphics.MasterMapSizeInTiles.X - 2))
+						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+				}
+			}
 		}
 		else if(Buttons & InterfaceCore::KEY_OK)
 			MainGameState.Music.PushBgm("Attack.ogg");

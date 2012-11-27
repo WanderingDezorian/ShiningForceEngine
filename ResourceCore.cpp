@@ -8,7 +8,6 @@
 #include <vector>
 #include <set>
 #include <map>
-#include "RapidXml/rapidxml.hpp"
 ///////////////////////////// Guard classes.  Makes loading structures exception safe.
 
 template<class T> inline T MAX(const T &A, const T &B){ return (A > B) ? A : B; }
@@ -331,6 +330,22 @@ int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, u
 				Core.LoadTileBuffer(iAssign->second,CurrentTileSet,TileX*(24+Spacing),TileY*(24+Spacing));
 				iAssign++;
 			}
+			for(xml_node<> *xLayer = xMap->first_node("objectgroup"); xLayer != 0; xLayer = xLayer->next_sibling("objectgroup")){
+				for(xml_node<> *xObj = xLayer->first_node("object"); xObj != 0; xObj = xObj->next_sibling("object")){
+					const char* Type = 0;
+					unsigned int x = 0, y = 0, w = 0, h = 0;
+					ReadAttribute(xObj,"type",Type);
+					ReadAttribute(xObj,"x",x);
+					ReadAttribute(xObj,"y",y);
+					ReadAttribute(xObj,"width",w);
+					ReadAttribute(xObj,"height",h);
+//					switch(Type){ // TODO:  Use lowercase comparisons
+//					case "blocker":
+//
+//
+//					}
+				}
+			}
 		}// End for each tileset
 	}catch(...){
 		return 0;
@@ -416,7 +431,7 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 	return true;
 }
 
-bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GraphicalData &Data){
+bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState &Data){
 	bool AllResourcesLoadedCorrectly = true;
 	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0;
 	AllResourcesLoadedCorrectly &= GetMapInfo("TestMap1.tmx", NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
@@ -426,10 +441,12 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GraphicalD
 	try{ // Catch allocation errors
 		if(!Core.AllocateTileBuffer(NumUniqueTiles))
 			return false;
-		Data.AllocateTileLayers(NumLayers);
+		if(!Data.Data.Initialize(MaxSizeX,MaxSizeY,1)) // TODO:  Don't hardcode max num mobs
+			return false;
+		Data.Graphics.AllocateTileLayers(NumLayers);
 		TileMapping::MaxBufferSize = MaxSizeX * MaxSizeY;
 		for(unsigned int i = 0; i < NumLayers; i++){
-			if(!Data.TileLayers[i].Allocate(TileMapping::MaxBufferSize))
+			if(!Data.Graphics.TileLayers[i].Allocate(TileMapping::MaxBufferSize))
 				return false;
 		}
 	}catch(...){

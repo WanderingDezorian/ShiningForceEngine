@@ -59,7 +59,7 @@ int main(int argc, char** argv){
 	}
 
 	// Validate manifest
-	if(!InitializeResources("TestMap1.tmx", myGraphicsCore, myGameState.Graphics)){
+	if(!InitializeResources("TestMap1.tmx", myGraphicsCore, myGameState)){
 		cerr << "Failed to initialize resource pool.  Verify resource files and retry.  Aborting." << endl;
 		return -1;
 	}

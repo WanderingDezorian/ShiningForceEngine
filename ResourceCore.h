@@ -2,9 +2,10 @@
 #define RESOURCE_CORE_H
 
 #include <SDL/SDL.h>
-#include "GraphicsCore.h"
+#include "RapidXml/rapidxml.hpp"
+#include "GameState.h"
 
-bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GraphicalData &Data); // Update later to support zip-file resource set
+bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState &Data); // Update later to support zip-file resource set
 
 SDL_Surface* LoadPng(const char* Filename);
 
@@ -31,5 +32,31 @@ public:
 	void StopGuarding(){ myPointer = 0; }
 	void Delete(){ if(myPointer) SDL_FreeSurface(myPointer); myPointer = 0; }
 };
+
+class XmlDoc{
+	char* FileBuf;
+	unsigned int FileBufSize;
+	rapidxml::xml_document<> doc;
+public:
+	XmlDoc();
+	~XmlDoc();
+
+	void PreAllocateBuffer(unsigned int NewSize);
+	bool OpenFile(const char* Filename);
+	bool IsOpen()const;
+	void CloseFile();
+};
+
+class MapFile : public XmlDoc{
+public:
+	MapFile();
+	~MapFile();
+	bool OpenFile(const char* Filename);
+	Point GetLayerSize();
+	bool LoadLayerData(unsigned int* Buffer);
+
+};
+
+
 
 #endif
