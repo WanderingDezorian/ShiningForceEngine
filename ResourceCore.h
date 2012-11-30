@@ -36,27 +36,29 @@ public:
 class XmlDoc{
 	char* FileBuf;
 	unsigned int FileBufSize;
-	rapidxml::xml_document<> doc;
+protected:
+	rapidxml::xml_document<> Doc;
 public:
-	XmlDoc();
-	~XmlDoc();
+	XmlDoc() : FileBuf(0), FileBufSize(0), Doc() {}
+	~XmlDoc(){ if(FileBuf) delete[] FileBuf; }
 
 	void PreAllocateBuffer(unsigned int NewSize);
 	bool OpenFile(const char* Filename);
-	bool IsOpen()const;
+	bool IsOpen()const{ return FileBufSize && (*FileBuf != '\0'); }
 	void CloseFile();
 };
 
 class MapFile : public XmlDoc{
+	rapidxml::xml_node<> *Layer;
 public:
-	MapFile();
-	~MapFile();
+	MapFile() : Layer(0) {}
+	~MapFile(){}
 	bool OpenFile(const char* Filename);
+	bool SeekToFirstLayer();
+	bool NextLayer();
 	Point GetLayerSize();
-	bool LoadLayerData(unsigned int* Buffer);
-
+	bool LoadLayerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad = true);
 };
-
 
 
 #endif

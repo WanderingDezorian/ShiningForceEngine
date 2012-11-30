@@ -458,3 +458,113 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState 
 		return false;
 	return true;
 }
+
+void XmlDoc::PreAllocateBuffer(unsigned int NewSize){
+	if(NewSize > FileBufSize){
+		FileBufSize = 0;
+		if(FileBuf)
+			delete[] FileBuf;
+		FileBuf = new char[NewSize];
+		FileBufSize = NewSize;
+	}
+}
+
+bool XmlDoc::OpenFile(const char* Filename){
+	if(FileBufSize == 0)
+		return false;
+	std::ifstream fin(Filename);
+	if(!fin.is_open())
+		return false;
+	Doc.clear();
+	fin.read(FileBuf,FileBufSize);
+	if(fin.fail()){
+		CloseFile();
+		return false;
+	}
+	try{
+		Doc.parse<0>(FileBuf);
+	}catch(...){
+		CloseFile();
+		return false;
+	}
+	return true;
+}
+
+void XmlDoc::CloseFile(){
+	if(FileBufSize != 0)
+		FileBuf[0] = '\0';
+	Doc.clear();
+}
+
+bool MapFile::OpenFile(const char* Filename){
+	Layer = 0;
+	if(!XmlDoc::OpenFile(Filename))
+		return false;
+	return SeekToFirstLayer();
+}
+
+bool MapFile::SeekToFirstLayer(){
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return false;
+	Layer = map->first_node("layer");
+	return Layer != 0;
+}
+
+bool MapFile::NextLayer(){
+	if(!Layer)
+		return false;
+	Layer = Layer->next_sibling("layer");
+	return Layer != 0;
+}
+Point MapFile::GetLayerSize(){
+	if(!Layer)
+		return Point(0);
+	Point RetVal;
+	if(!ReadAttribute(Layer,"width",RetVal.X))
+		return Point(0);
+	if(!ReadAttribute(Layer,"height",RetVal.Y))
+		return Point(0);
+	return RetVal;
+}
+
+bool MapFile::LoadLayerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad){
+	if(!Layer)
+		return false;
+	uLongf BufferSizeInBytes = BufferSize * sizeof(unsigned int);
+	rapidxml::xml_node<> *xData = Layer->first_node("data");
+	if(!xData)
+		return false;
+	xml_attribute<> *xAttrib = xData->first_attribute("encoding");
+	bool Encoded = xAttrib && (strcmp(xAttrib->value(),"base64") == 0);
+	xAttrib = xData->first_attribute("compression");
+	bool Compressed = xAttrib && (strcmp(xAttrib->value(),"zlib") == 0);
+
+	xml_node<> *xTileBuffer = xData->first_node();
+	if(!xTileBuffer->value())
+		return false;
+	unsigned int EncodedBufferSize;
+	if(Encoded){
+		if(DestructiveLoad)
+			EncodedBufferSize = b64.Decode((unsigned char*) xTileBuffer->value());
+		else
+			return false; // TODO:  Implement non-destructive loads!
+	}
+	else
+		EncodedBufferSize = strlen(xTileBuffer->value());
+	if(Compressed){
+		const Bytef* InBuf = (const Bytef*) xTileBuffer->value();
+		if(uncompress((Bytef*) Buffer, &BufferSizeInBytes, InBuf, EncodedBufferSize) != Z_OK){ throw 1; }
+	}
+	else{
+		if(BufferSizeInBytes > EncodedBufferSize)
+			BufferSizeInBytes = EncodedBufferSize;
+		memcpy(Buffer,xTileBuffer->value(),BufferSizeInBytes);
+	}
+	// BufferSize = ceil( BufferSizeInBytes / 2 )
+	BufferSize = BufferSizeInBytes >> 2;
+	if(BufferSizeInBytes & 0x03)
+		BufferSize++;
+	// Todo:  Endian swap if necessary
+	return true;
+}
