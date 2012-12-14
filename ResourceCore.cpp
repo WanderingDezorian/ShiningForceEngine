@@ -358,72 +358,33 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 	if(!fin.is_open())
 		return false;
 	fin.seekg(0,std::ios_base::end);
-	int FileLength = fin.tellg();
-	char* FileBuf = new char[FileLength + 1]; // Add extra for '\0' safety cap.
-	ArrayGuard<char> Guard_FileBuf(FileBuf);
-	fin.seekg(0,std::ios_base::beg);
-	fin.read(FileBuf,FileLength);
-	FileBuf[FileLength] = '\0';
+	MapFile MyMap;
+	MyMap.PreAllocateBuffer(fin.tellg());
+	fin.close();
+
+	if(!MyMap.OpenFile(Filename))
+		return false;
+
 	std::set<unsigned int> UniqueTiles;
 	unsigned int LocalNumLayers = 0;
 	MaxSizeXinTiles = 0;
 	MaxSizeYinTiles = 0;
 	errno = 0;
-	try{
-		xml_document<> doc;    // character type defaults to char
-		doc.parse<0>(FileBuf);    // 0 means default parse flags
-		xml_node<> *xMap = doc.first_node("map");    // 0 means default parse flags
-		if(xMap == 0){ return false; }
-		for(xml_node<> *xLayer = xMap->first_node("layer"); xLayer != 0; xLayer = xLayer->next_sibling("layer")){
-			LocalNumLayers += 1;
-			xml_attribute<> *xAttrib = xLayer->first_attribute("width");
-			if(!xAttrib)
-				return false;
-			char* EndScan;
-			unsigned int SizeX = strtoul(xAttrib->value(), &EndScan, 0);
-			if(errno || (*EndScan != '\0')) // Make sure good scan with no garbage at end
-				return false;
-			StoreMax(MaxSizeXinTiles, SizeX);
-
-			// Read height
-			xAttrib = xLayer->first_attribute("height");
-			if(!xAttrib)
-				return false;
-			unsigned int SizeY = strtoul(xAttrib->value(), &EndScan, 0);
-			if(errno || (*EndScan != '\0')) // Make sure good scan with no garbage at end
-				return false;
-			StoreMax(MaxSizeYinTiles, SizeY);
-
-			// Get data
-			xml_node<> *xData = xLayer->first_node("data");
-			if(!xData)
-				return false;
-			xAttrib = xData->first_attribute("encoding");
-			bool Encoded = xData && (strcmp(xAttrib->value(),"base64") == 0);
-			xAttrib = xData->first_attribute("compression");
-			bool Compressed = xData && (strcmp(xAttrib->value(),"zlib") == 0);
-			xml_node<> *xTileBuffer = xData->first_node();
-			if(!xTileBuffer->value()){ throw 1; }
-			int BufferSize;
-			if(Encoded)
-				BufferSize = b64.Decode((unsigned char*) xTileBuffer->value());
-			else
-				BufferSize = strlen(xTileBuffer->value());
-			if(Compressed){
-				std::vector<unsigned int> Buffer(SizeX*SizeY);
-				const Bytef* InBuf = (const Bytef*) xTileBuffer->value();
-				uLong OutBufSize = SizeX*SizeY*sizeof(unsigned int);
-				if(Z_OK != uncompress((Bytef*) (&Buffer[0]), &OutBufSize, InBuf, BufferSize))
-					return false;
-				UniqueTiles.insert(Buffer.begin(),Buffer.end());
-			}
-			else{
-				UniqueTiles.insert((unsigned int*)xTileBuffer->value(),(unsigned int*) (xTileBuffer->value() + BufferSize));
-			}
-		}
-	}catch(...){
-		return false;
-	}
+	Point LayerSize;
+	unsigned int LayerNumEl;
+	do{
+		LocalNumLayers += 1;
+		LayerSize = MyMap.GetLayerSize();
+		LayerNumEl = LayerSize.X * LayerSize.Y;
+		if(LayerNumEl == 0)
+			return false;
+		StoreMax(MaxSizeXinTiles, LayerSize.X);
+		StoreMax(MaxSizeYinTiles, LayerSize.Y);
+		std::vector<unsigned int> Buffer(LayerNumEl);
+		if(!MyMap.LoadLayerData(&Buffer[0],LayerNumEl))
+			return false;
+		UniqueTiles.insert(Buffer.begin(),Buffer.begin() + LayerNumEl);
+	}while(MyMap.NextLayer());
 	if(LocalNumLayers > NumLayers)
 		NumLayers = LocalNumLayers;
 	if(NumUniqueTiles < UniqueTiles.size())
