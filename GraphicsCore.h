@@ -120,7 +120,7 @@ struct TileMapping{ // This is a layer
 	Point ScaleDenominator;
 	bool WrapX, WrapY;
 	unsigned int TileValueBufferSize;
-	TileMapping(): SizeX(0), SizeY(0), TileValues(0), MainBufferOffset(0), TileValueBufferSize(0), WrapX(false), WrapY(false) {};
+	TileMapping(): SizeX(0), SizeY(0), TileValues(0), MainBufferOffset(0), WrapX(false), WrapY(false), TileValueBufferSize(0) {};
 	~TileMapping(){ if(TileValues) delete[] TileValues; }
 	static unsigned int MaxBufferSize;
 	bool Allocate(){ return Allocate(SizeX * SizeY); }
