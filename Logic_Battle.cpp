@@ -6,7 +6,7 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
 	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
-	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);
+//	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);
 	// TODO:  Do this elsewhere
 	for(TileMapping* iLayer = MainGameState.Graphics.TileLayers; iLayer < MainGameState.Graphics.TileLayersEnd; iLayer++)
 		MainGameState.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
