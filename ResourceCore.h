@@ -11,7 +11,7 @@ SDL_Surface* LoadPng(const char* Filename);
 
 // TODO:  Add song loader, wav loader
 
-int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, unsigned int NumLayers); // Returns number of layers provided
+int LoadMap(const char* Filename, GraphicsCore& GCore, GameState &Data); // Returns number of layers provided
 bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &MaxSizeXinTiles, unsigned int &MaxSizeYinTiles,unsigned int &NumUniqueTiles);
 
 class FileGuard{

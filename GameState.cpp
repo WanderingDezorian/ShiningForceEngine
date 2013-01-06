@@ -8,11 +8,11 @@ bool GameData::Initialize(unsigned int MaxMapSizeX, unsigned int MaxMapSizeY, un
 		Blockers = new unsigned char[NeededBufferSize];
 		BlockerBufferSize = NeededBufferSize;
 	}
-	if(MobBufferSize < NeededBufferSize){
+	if(MobBufferSize < MaxNumMobs){
 		if(Mobs)
 			delete[] Mobs;
-		Mobs = new Mob[NeededBufferSize];
-		MobBufferSize = NeededBufferSize;
+		Mobs = new Mob[MaxNumMobs];
+		MobBufferSize = MaxNumMobs;
 		SelectedMob = Mobs;
 	}
 	return true;

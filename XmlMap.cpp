@@ -146,15 +146,26 @@ bool MapFile::SeekToFirstLayer(){
 	if(map == 0)
 		return false;
 	Layer = map->first_node("layer");
-	return Layer != 0;
+	if(Layer == 0)
+		return false;
+	xml_attribute<> *xAttrib = Layer->first_attribute("name");
+	if(xAttrib && (strcmp(xAttrib->value(),"Blockers") == 0))
+		return NextLayer();
+	return true;
 }
 
 bool MapFile::NextLayer(){
 	if(!Layer)
 		return false;
 	Layer = Layer->next_sibling("layer");
-	return Layer != 0;
+	if(Layer == 0)
+		return false;
+	xml_attribute<> *xAttrib = Layer->first_attribute("name");
+	if(xAttrib && (strcmp(xAttrib->value(),"Blockers") == 0))
+		return NextLayer();
+	return true;
 }
+
 Point MapFile::GetLayerSize(){
 	if(!Layer)
 		return Point(0);
@@ -248,4 +259,39 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		}
 	}// End for each tileset
 	return true;
+}
+
+bool MapFile::LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad){
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return false;
+	rapidxml::xml_node<> *OriginalLayer = Layer;
+	bool RetVal = false;
+	for(Layer = map->first_node("layer"); Layer != 0; Layer = Layer->next_sibling("layer")){
+		xml_attribute<> *xAttrib = Layer->first_attribute("name");
+		if(xAttrib && (strcmp(xAttrib->value(),"Blockers") == 0)){
+			RetVal = LoadLayerData(Buffer, BufferSize, DestructiveLoad);
+			break;
+		}
+	}
+	Layer = OriginalLayer;
+	return RetVal;
+}
+
+Point MapFile::GetBlockerSizeInTiles(){
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return Point(0);
+	for(rapidxml::xml_node<> *pLayer = map->first_node("layer"); pLayer != 0; pLayer = pLayer->next_sibling("layer")){
+		xml_attribute<> *xAttrib = pLayer->first_attribute("name");
+		if(xAttrib && (strcmp(xAttrib->value(),"Blockers") == 0)){
+			Point RetVal;
+			if(!ReadAttribute(pLayer,"width",RetVal.X))
+				return Point(0);
+			if(!ReadAttribute(pLayer,"height",RetVal.Y))
+				return Point(0);
+			return RetVal;
+		}
+	}
+	return Point(0);
 }

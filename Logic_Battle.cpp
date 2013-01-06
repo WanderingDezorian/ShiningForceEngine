@@ -3,7 +3,7 @@
 
 bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
 	//////// Load tiles
-	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState.Graphics.TileLayers, MainGameState.Graphics.NumTileLayers); // Returns number of layers provided
+	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
 	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
 	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);

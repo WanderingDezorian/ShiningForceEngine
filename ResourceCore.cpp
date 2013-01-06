@@ -8,6 +8,27 @@
 template<class T> inline T MAX(const T &A, const T &B){ return (A > B) ? A : B; }
 template<class T> inline void StoreMax(T &A, const T &B){ if(B > A) A = B; }
 
+static const unsigned char BlockerTranslationTable[16] = {
+		GameData::BLOCKER_BORDER_LEFT | GameData::BLOCKER_BORDER_UP, GameData::BLOCKER_BORDER_UP, GameData::BLOCKER_BORDER_UP | GameData::BLOCKER_BORDER_RIGHT, GameData::BLOCKER_BORDER_UP | GameData::BLOCKER_BORDER_DOWN,
+		GameData::BLOCKER_BORDER_LEFT, GameData::BLOCKER_MAP, GameData::BLOCKER_BORDER_RIGHT, GameData::BLOCKER_BORDER_LEFT | GameData::BLOCKER_BORDER_RIGHT,
+		GameData::BLOCKER_BORDER_LEFT | GameData::BLOCKER_BORDER_DOWN, GameData::BLOCKER_BORDER_DOWN, GameData::BLOCKER_BORDER_DOWN | GameData::BLOCKER_BORDER_RIGHT, 0,
+		GameData::BLOCKER_BORDER_UP | GameData::BLOCKER_BORDER_DOWN | GameData::BLOCKER_BORDER_RIGHT, GameData::BLOCKER_BORDER_LEFT | GameData::BLOCKER_BORDER_RIGHT | GameData::BLOCKER_BORDER_DOWN,
+		GameData::BLOCKER_BORDER_LEFT | GameData::BLOCKER_BORDER_RIGHT | GameData::BLOCKER_BORDER_UP, GameData::BLOCKER_BORDER_UP | GameData::BLOCKER_BORDER_DOWN | GameData::BLOCKER_BORDER_LEFT };
+
+void TranslateBlockers(unsigned int* BlockerIn, unsigned char* BlockerOut, unsigned int BlockerGidOffset){
+	if(*BlockerIn < BlockerGidOffset){
+		*BlockerOut = 0;
+		return;
+	}
+	*BlockerIn -= BlockerGidOffset;
+	if(*BlockerIn > 16){
+		*BlockerOut = 0;
+		return;
+	}
+	*BlockerOut = BlockerTranslationTable[*BlockerIn];
+	return;
+}
+
 class PngGuard{
 	png_struct *PngStruct;
 	png_info *StartInfo;
@@ -127,7 +148,10 @@ SDL_Surface* LoadPng(const char* Filename){ // Loads to a software image
 
 using namespace std;
 
-int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, unsigned int NumLayers){ // Returns number of layers provided
+int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMapping* TileLayers, unsigned int NumLayers){ // Returns number of layers provided
+
+	TileMapping* TileLayers = Data.Graphics.TileLayers;
+	unsigned int NumLayers = Data.Graphics.NumTileLayers;
 	std::ifstream fin(Filename);
 	if(!fin.is_open())
 		return -1;
@@ -142,6 +166,19 @@ int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, u
 	std::map<unsigned int,unsigned int> TileAssignments;
 	MyMap.ClearAttributeReadErrors();
 	Point LayerSize;
+
+	// Load the blocker buffer into a tile layer first, since map buffer uncompresses to ints, not bytes.  Then translate and downsize.
+	unsigned int LayerNumEl = TileMapping::MaxBufferSize;
+	if(!MyMap.LoadBlockerData(Data.Graphics.TileLayers->TileValues,LayerNumEl))
+		return false;
+	unsigned int* BlockerIn = Data.Graphics.TileLayers->TileValues;
+	unsigned char* BlockerOut = Data.Data.Blockers;
+	for(unsigned int i = 0; i < LayerNumEl; i++){
+		TranslateBlockers(BlockerIn, BlockerOut, 65);
+		BlockerIn++;
+		BlockerOut++;
+	}
+
 	do{
 		if(NumLayersLoaded >= NumLayers)
 			return NumLayersLoaded;
@@ -151,7 +188,7 @@ int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, u
 		LayerSize = MyMap.GetLayerSize();
 		TileLayers->SizeX = LayerSize.X;
 		TileLayers->SizeY = LayerSize.Y;
-		unsigned int LayerNumEl = LayerSize.X * LayerSize.Y;
+		LayerNumEl = LayerSize.X * LayerSize.Y;
 		if(LayerNumEl == 0)
 			return false;
 
@@ -180,6 +217,7 @@ int LoadMap(const char* Filename, GraphicsCore &Core, TileMapping* TileLayers, u
 		// WORKING HERE:  Load in the tiles.
 	if(!MyMap.LoadImageData(Core,TileAssignments))
 		return -1;
+
 
 /*		for(xml_node<> *xLayer = xMap->first_node("objectgroup"); xLayer != 0; xLayer = xLayer->next_sibling("objectgroup")){
 			for(xml_node<> *xObj = xLayer->first_node("object"); xObj != 0; xObj = xObj->next_sibling("object")){
@@ -215,9 +253,11 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 
 	std::set<unsigned int> UniqueTiles;
 	unsigned int LocalNumLayers = 0;
-	MaxSizeXinTiles = 0;
-	MaxSizeYinTiles = 0;
-	Point LayerSize;
+	Point LayerSize = MyMap.GetBlockerSizeInTiles();
+	if(LayerSize == 0)
+		return false;
+	MaxSizeXinTiles = LayerSize.X;
+	MaxSizeYinTiles = LayerSize.Y;
 	unsigned int LayerNumEl;
 	do{
 		LocalNumLayers += 1;
