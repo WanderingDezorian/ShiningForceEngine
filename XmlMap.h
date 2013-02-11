@@ -53,8 +53,8 @@ public:
 class MasterManifest : public XmlDoc{
 	rapidxml::xml_node<> *Layer;
 public:
-	LevelFile() : Layer(0) {}
-	~LevelFile(){}
+	MasterManifest() : Layer(0) {}
+	~MasterManifest(){}
 	bool OpenFile(const char* Filename);
 };
 

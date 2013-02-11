@@ -312,15 +312,15 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState 
 
 bool ZipfileInterface::OpenFile(const char* Filename){
 	CloseFile();
-	unzFile = unzOpen(Filename);
+	zFile = unzOpen(Filename);
 	return IsOpen();
 }
 
 bool ZipfileInterface::IsOpen()const{ return zFile != 0; }
 void ZipfileInterface::CloseFile(){
-	if(unzFile){
-		unzClose(unzFile);
-		unzFile = 0;
+	if(zFile){
+		unzClose(zFile);
+		zFile = 0;
 	}
 }
 
@@ -340,31 +340,30 @@ bool ZipfileInterface::Uncompress(const char* Filename,unsigned char* Buffer, un
 	Uncompress(Buffer,BufferLength);
 	return true;
 }
-bool ZipfileInterface::UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength){
+int ZipfileInterface::UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength){
 	if(!ContainsFile(Filename))
 		return false;
-	UncompressInexact(Buffer,BufferLength);
-	return true;
+	return UncompressInexact(Buffer,BufferLength);
 }
 bool ZipfileInterface::ContainsFile(const char* Filename)const{
-	return unzLocateFile(unzFile,Filename,1) == UNZ_OK; // IS case sensitive
+	return unzLocateFile(zFile,Filename,1) == UNZ_OK; // IS case sensitive
 }
 unsigned int ZipfileInterface::Filesize()const{
 	unz_file_info Info;
-	if(unzGetCurrentFileInfo(unzFile,&Info,0,0,0,0,0,0) != UNZ_OK)
+	if(unzGetCurrentFileInfo(zFile,&Info,0,0,0,0,0,0) != UNZ_OK)
 		return 0;
 	return Info.uncompressed_size;
 }
 bool ZipfileInterface::IsStoredUncompressed()const{
 	unz_file_info Info;
-	if(unzGetCurrentFileInfo(unzFile,&Info,0,0,0,0,0,0) != UNZ_OK)
+	if(unzGetCurrentFileInfo(zFile,&Info,0,0,0,0,0,0) != UNZ_OK)
 		return false;
 	return Info.uncompressed_size == 0;
 }
 bool ZipfileInterface::Uncompress(unsigned char* Buffer, unsigned int BufferLength){
-	return unzReadCurrentFile(unzFile,Buffer,BufferLength) == BufferLength;
+	return unzReadCurrentFile(zFile,Buffer,BufferLength) == BufferLength;
 }
 
 int ZipfileInterface::UncompressInexact(unsigned char* Buffer, unsigned int BufferLength){
-	return unzReadCurrentFile(unzFile,Buffer,BufferLength);
+	return unzReadCurrentFile(zFile,Buffer,BufferLength);
 }

@@ -1,7 +1,7 @@
 #ifndef RESOURCE_CORE_H
 #define RESOURCE_CORE_H
 
-#include "unzip.h"
+#include "MiniZip/unzip.h"
 #include <SDL/SDL.h>
 #include <map>
 #include "GameState.h"
