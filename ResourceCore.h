@@ -1,6 +1,7 @@
 #ifndef RESOURCE_CORE_H
 #define RESOURCE_CORE_H
 
+#include "unzip.h"
 #include <SDL/SDL.h>
 #include <map>
 #include "GameState.h"
@@ -31,6 +32,26 @@ public:
 	void GuardSurface(SDL_Surface* ToGuard){ myPointer = ToGuard; }
 	void StopGuarding(){ myPointer = 0; }
 	void Delete(){ if(myPointer) SDL_FreeSurface(myPointer); myPointer = 0; }
+};
+
+class ZipfileInterface{ // TODO:  Make singleton
+	unzFile zFile;
+public:
+	ZipfileInterface() : zFile(0) {}
+	~ZipfileInterface(){ CloseFile(); }
+	bool OpenFile(const char* Filename);
+	bool IsOpen()const;
+	void CloseFile();
+
+	bool ContainsFile(const char* Filename)const;
+	unsigned int Filesize()const;
+	unsigned int Filesize(const char* Filename)const;
+	bool IsStoredUncompressed()const;
+	bool IsStoredUncompressed(const char* Filename)const;
+	bool Uncompress(unsigned char* Buffer, unsigned int BufferLength);
+	bool Uncompress(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
+	int UncompressInexact(unsigned char* Buffer, unsigned int BufferLength);
+	int UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
 };
 
 #endif

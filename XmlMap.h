@@ -6,8 +6,13 @@
 #include "RapidXml/rapidxml.hpp"
 #include "ResourceCore.h"
 
+// Game shall have the following files:
+//  Map files - *.tmx, follow "tiled" executable file format
+//  Level files - *.xml, indicate a map file, mob text, battle orientation, etc.
+//  Game manifest - manifest.xml, lists all levels and entry requirements.
+
 class XmlDoc{
-	char* FileBuf;
+	char* FileBuf; // TODO:  Make static- come up with static deletor
 	unsigned int FileBufSize;
 protected:
 	rapidxml::xml_document<> Doc;
@@ -35,6 +40,22 @@ public:
 	bool LoadLayerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad = true);
 	bool LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad = true); //TODO:  Verify blocker size is less than map max size.
 	bool LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,unsigned int> &TileAssignments);
+};
+
+class LevelFile : public XmlDoc{
+	rapidxml::xml_node<> *Layer;
+public:
+	LevelFile() : Layer(0) {}
+	~LevelFile(){}
+	bool OpenFile(const char* Filename);
+};
+
+class MasterManifest : public XmlDoc{
+	rapidxml::xml_node<> *Layer;
+public:
+	LevelFile() : Layer(0) {}
+	~LevelFile(){}
+	bool OpenFile(const char* Filename);
 };
 
 #endif // XMLMAP_H
