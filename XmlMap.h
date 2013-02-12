@@ -11,18 +11,34 @@
 //  Level files - *.xml, indicate a map file, mob text, battle orientation, etc.
 //  Game manifest - manifest.xml, lists all levels and entry requirements.
 
+struct CharBuffer{
+	char* Buf; // TODO:  Make static- come up with static deletor
+	unsigned int Size;
+public:
+	CharBuffer() : Buf(0), Size(0) {}
+	~CharBuffer(){ if(Buf) delete[] Buf; }
+	void Resize(unsigned int NewSize){
+		if(Size < NewSize){
+			if(Buf)
+				delete[] Buf;
+			Buf = 0;
+			Buf = new char[NewSize];
+			Size = NewSize;
+		}
+	}
+};
+
 class XmlDoc{
-	char* FileBuf; // TODO:  Make static- come up with static deletor
-	unsigned int FileBufSize;
+	static CharBuffer FileBuf; // TODO:  Make static- come up with static deletor
 protected:
 	rapidxml::xml_document<> Doc;
 public:
-	XmlDoc() : FileBuf(0), FileBufSize(0), Doc() {}
-	~XmlDoc(){ if(FileBuf) delete[] FileBuf; }
+	XmlDoc() : Doc() {}
+	~XmlDoc(){}
 
 	void PreAllocateBuffer(unsigned int NewSize);
 	bool OpenFile(const char* Filename);
-	bool IsOpen()const{ return FileBufSize && (*FileBuf != '\0'); }
+	bool IsOpen()const{ return (FileBuf.Size && (FileBuf.Buf[0] != '\0')); }
 	void CloseFile();
 	static void ClearAttributeReadErrors();
 };

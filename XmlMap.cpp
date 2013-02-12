@@ -3,6 +3,8 @@
 #include <fstream>
 #include <png.h>
 
+CharBuffer XmlDoc::FileBuf;
+
 inline bool ReadAttribute(rapidxml::xml_node<> *Parent, const char* AttributeName, const char* &Value){
 	rapidxml::xml_attribute<> *xAttrib = Parent->first_attribute(AttributeName);
 	if(!xAttrib)
@@ -94,31 +96,23 @@ int b64decode(unsigned char* ToDecode){
 using namespace rapidxml;
 
 void XmlDoc::PreAllocateBuffer(unsigned int NewSize){
-	if(NewSize > FileBufSize){
-		FileBufSize = 0;
-		if(FileBuf)
-			delete[] FileBuf;
-		FileBuf = new char[NewSize + 1]; // Add extra character for null-termination.
-		FileBufSize = NewSize;
-	}
+	FileBuf.Resize(NewSize + 1); // Add extra character for null-termination.
 }
 
 bool XmlDoc::OpenFile(const char* Filename){
-	if(FileBufSize == 0)
+	if(FileBuf.Size == 0)
 		return false;
 	std::ifstream fin(Filename);
 	if(!fin.is_open())
 		return false;
-	Doc.clear();
-
-	fin.read(FileBuf,FileBufSize);
-	if(fin.fail()){
+	fin.read(FileBuf.Buf,FileBuf.Size);
+	if(!fin.eof()){ // If we did not reach the end of the file...
 		CloseFile();
 		return false;
 	}
-	FileBuf[fin.tellg()] = '\0'; //Put in null-terminating zero.
+	FileBuf.Buf[fin.tellg()] = '\0'; //Put in null-terminating zero.
 	try{
-		Doc.parse<0>(FileBuf);
+		Doc.parse<0>(FileBuf.Buf);
 	}catch(...){
 		CloseFile();
 		return false;
@@ -127,8 +121,8 @@ bool XmlDoc::OpenFile(const char* Filename){
 }
 
 void XmlDoc::CloseFile(){
-	if(FileBufSize != 0)
-		FileBuf[0] = '\0';
+	if(FileBuf.Size != 0)
+		FileBuf.Buf[0] = '\0';
 	Doc.clear();
 }
 
