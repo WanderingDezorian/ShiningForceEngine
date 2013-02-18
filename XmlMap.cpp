@@ -1,4 +1,5 @@
 #include "XmlMap.h"
+#include "GraphicsCore.h"
 #include <errno.h>
 #include <fstream>
 #include <png.h>
@@ -218,9 +219,9 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		return false;
 	for(xml_node<> *xSet = xMap->first_node("tileset"); xSet != 0; xSet = xSet->next_sibling("tileset")){
 		unsigned int FirstGid, NextImageFirstGid, Spacing, TileWidth;
-		if(!(ReadAttribute(xSet,"tilewidth",FirstGid) && FirstGid == 24))
+		if(!(ReadAttribute(xSet,"tilewidth",FirstGid) && FirstGid == GTileSize)) // TODO:  Blockers won't be same width.
 			return false;
-		if(!(ReadAttribute(xSet,"tileheight",FirstGid) && FirstGid == 24))
+		if(!(ReadAttribute(xSet,"tileheight",FirstGid) && FirstGid == GTileSize))
 			return false;
 		if(!ReadAttribute(xSet,"firstgid",FirstGid))
 			return false;
@@ -229,10 +230,10 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		xml_node<> *xFile = xSet->first_node("image");
 		if(!ReadAttribute(xFile,"width",TileWidth))
 			return false;
-		TileWidth = (TileWidth + Spacing)/(24 + Spacing);
+		TileWidth = (TileWidth + Spacing)/(GTileSize + Spacing);
 		if(!ReadAttribute(xFile,"height",NextImageFirstGid)) // Image height in pixels
 			return false;
-		NextImageFirstGid = (NextImageFirstGid + Spacing)/(24 + Spacing); // Now number of rows of tiles
+		NextImageFirstGid = (NextImageFirstGid + Spacing)/(GTileSize + Spacing); // Now number of rows of tiles
 		NextImageFirstGid = (NextImageFirstGid * TileWidth) + FirstGid; // Now total number of tiles, + FirstGid
 		std::map<unsigned int, unsigned int>::const_iterator iAssign = TileAssignments.lower_bound(FirstGid);
 		std::map<unsigned int, unsigned int>::const_iterator iEnd = TileAssignments.lower_bound(NextImageFirstGid);
@@ -248,7 +249,7 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		while(iAssign != iEnd){
 			unsigned int TileY = (iAssign->first - FirstGid) / TileWidth;
 			unsigned int TileX = (iAssign->first - FirstGid) - TileY * TileWidth;
-			LoadTo.LoadTileBuffer(iAssign->second,CurrentTileSet,TileX*(24+Spacing),TileY*(24+Spacing));
+			LoadTo.LoadTileBuffer(iAssign->second,CurrentTileSet,TileX*(GTileSize+Spacing),TileY*(GTileSize+Spacing));
 			iAssign++;
 		}
 	}// End for each tileset

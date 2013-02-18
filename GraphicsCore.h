@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 
+static const int PTileSize = 24; // Player tile size
+static const int GTileSize = 24; // Graphics tile size
+
 struct Point{
 	unsigned int X,Y; // TODO:  Does TileX/Y serve any purpose?
 	Point() : X(0), Y(0) {}
@@ -197,8 +200,8 @@ struct GraphicalData{
 class GraphicsCore{
 	private:
 		SDL_Surface* MainWindow;
-		BlockBuffer<24> TileBuffer;
-		BlockBuffer<24> SpriteBuffer;
+		BlockBuffer<GTileSize> TileBuffer;
+		BlockBuffer<PTileSize> SpriteBuffer;
 		SDL_Rect TileRect;
 		SDL_Rect DestRect;
 		//SDL_Renderer* Renderer;

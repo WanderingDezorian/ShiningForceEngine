@@ -15,7 +15,7 @@ Pre-release v2:
 [X]-(    Happel):   Use "blocks" to prevent movement in key areas
 [ ]-(    Happel):   Demonstrate transition to new maps- use a simple overworld and two towns.
 [X]-(    Happel):   Add background music support
-[ ]-(    Happel):   Switch map tiles from 24x24 to 12x12
+[I]-(    Happel):   Switch map tiles from 24x24 to 12x12
 [I]-(    Happel):   Combine all resources into a single zipfile
 Pre-release v3:
 * Incorporate entry into simple "battle"- for now, use a simple map, win by walking over the single "enemy"

@@ -17,12 +17,12 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 	mySprite.OrientationBufferSize = 2;
 	mySprite.CurrentOffset = 0;
 	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
-	mySprite.Position = Point(7,5) * 24;
+	mySprite.Position = Point(7,5) * PTileSize;
 	MainGameState.Graphics.AllSprites.push_back(mySprite);
 	SDL_Surface* Temp = LoadPng("Noah.png");
 	SurfaceGuard GuardTemp(Temp);
 	for(int i = 0; i < 8; i++){
-		GCore.LoadSpriteBuffer(i,Temp,i*24,0);
+		GCore.LoadSpriteBuffer(i,Temp,i*PTileSize,0);
 	}
 
 	///////// Load mobiles
@@ -45,7 +45,7 @@ bool Logic_MinorTic_Battle(GameState &MainGameState){
 	MainGameState.FramesInMode++;
 	Mob* iMob = &MainGameState.Mobs[0];
 	Sprite* iSprite = &MainGameState.Graphics.AllSprites[0];
-	Point TargetPos = iMob->OccupiedTile * 24;
+	Point TargetPos = iMob->OccupiedTile * PTileSize;
 	if(iMob->Speed){
 		iSprite->Position.MoveTowards(TargetPos,iMob->Speed);
 		MainGameState.Graphics.MasterCamera.MoveTowards(MainGameState.Graphics.DesiredMasterCamera,iMob->Speed);
@@ -73,7 +73,7 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 			if(SelectedMob->OccupiedTile.Y != 0){
 				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y - 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_DOWN) == 0){
 					SelectedMob->OccupiedTile.Y--;
-					int Desired = (SelectedMob->OccupiedTile.Y - 2) * 24;
+					int Desired = (SelectedMob->OccupiedTile.Y - 2) * PTileSize;
 					if((Desired < MainGameState.Graphics.MasterCamera.Y) && (Desired >= 0))
 						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
 				}
@@ -84,7 +84,7 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1){
 				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y + 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_UP) == 0){
 					SelectedMob->OccupiedTile.Y++;
-					int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * 24;
+					int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * PTileSize;
 					if((Desired > int(MainGameState.Graphics.MasterCamera.Y)) && (SelectedMob->OccupiedTile.Y < MainGameState.Graphics.MasterMapSizeInTiles.Y - 2))
 						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
 				}
@@ -95,7 +95,7 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 			if(SelectedMob->OccupiedTile.X != 0){
 				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X - 1] & GameData::BLOCKER_MASK_RIGHT) == 0){
 					SelectedMob->OccupiedTile.X--;
-					int Desired = (SelectedMob->OccupiedTile.X - 2) * 24;
+					int Desired = (SelectedMob->OccupiedTile.X - 2) * PTileSize;
 					if((Desired < MainGameState.Graphics.MasterCamera.X) && (Desired >= 0))
 						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
 				}
@@ -106,7 +106,7 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1){
 				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X + 1] & GameData::BLOCKER_MASK_LEFT) == 0){
 					SelectedMob->OccupiedTile.X++;
-					int Desired = int(SelectedMob->OccupiedTile.X * 24) + (3*24 - 320);
+					int Desired = int(SelectedMob->OccupiedTile.X * PTileSize) + (3*PTileSize - 320);
 					if((Desired > int(MainGameState.Graphics.MasterCamera.X)) && (SelectedMob->OccupiedTile.X < MainGameState.Graphics.MasterMapSizeInTiles.X - 2))
 						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
 				}
