@@ -11,6 +11,15 @@
 //  Level files - *.xml, indicate a map file, mob text, battle orientation, etc.
 //  Game manifest - manifest.xml, lists all levels and entry requirements.
 
+/*
+ * <game Name= Author=
+ *  <intro Format=
+ *  <title Image = Flicker=
+ *  <levels>
+ *  	<town src= map=>
+ *  	<battle src= map=>
+ */
+
 struct CharBuffer{
 	char* Buf; // TODO:  Make static- come up with static deletor
 	unsigned int Size;
@@ -29,7 +38,7 @@ public:
 };
 
 class XmlDoc{
-	static CharBuffer FileBuf; // TODO:  Make static- come up with static deletor
+	static CharBuffer FileBuf;
 protected:
 	rapidxml::xml_document<> Doc;
 public:
