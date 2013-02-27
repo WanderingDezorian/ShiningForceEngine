@@ -308,6 +308,28 @@ bool MasterManifest::ValidateManifest(ZipfileInterface &ToVal){
 // 1) Verify all files exist
 // 2) Determine maximum file size
 // 3) Validate all linkages (todo)
+	unsigned int MaxSize = 0;
+	for(rapidxml::xml_node<> *iLevel = Levels->first_node(); iLevel != 0; iLevel = iLevel->next_sibling()){
+		const char *Name;
+		unsigned int Size;
+		if(!ReadAttribute(iLevel,"src",Name))
+			return false;
+		Size = ToVal.Filesize(Name);
+		if(Size == 0)
+			return false;
+		if(Size > MaxSize)
+			MaxSize = Size;
+
+		if(!ReadAttribute(iLevel,"map",Name))
+			return false;
+		Size = ToVal.Filesize(Name);
+		if(Size == 0)
+			return false;
+		if(Size > MaxSize)
+			MaxSize = Size;
+	}
+	XmlDoc::PreAllocateBuffer(MaxSize);
+	return true;
 }
 
 bool MasterManifest::GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map){

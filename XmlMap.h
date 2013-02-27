@@ -84,7 +84,7 @@ class MasterManifest : public XmlDoc{
 	std::map<std::string,std::string> ExistingTags;
 	std::map<std::string,std::string> NeededTags;*/
 public:
-	MasterManifest() : Layer(0) {}
+	MasterManifest() : Levels(0) {}
 	~MasterManifest(){}
 	bool OpenFile(const char* Filename);
 
