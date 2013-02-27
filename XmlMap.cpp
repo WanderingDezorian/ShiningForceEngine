@@ -290,3 +290,39 @@ Point MapFile::GetBlockerSizeInTiles(){
 	}
 	return Point(0);
 }
+
+bool MasterManifest::OpenFile(const char* Filename){
+	Levels = 0;
+	if(!XmlDoc::OpenFile(Filename))
+		return false;
+	rapidxml::xml_node<> *game = Doc.first_node("game");
+	if(game != 0)
+		Levels = game->first_node("levels");
+	if(Levels)
+		return true;
+	XmlDoc::CloseFile();
+	return false;
+}
+
+bool MasterManifest::ValidateManifest(ZipfileInterface &ToVal){
+// 1) Verify all files exist
+// 2) Determine maximum file size
+// 3) Validate all linkages (todo)
+}
+
+bool MasterManifest::GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map){
+	for(rapidxml::xml_node<> *iLevel = Levels->first_node(); iLevel != 0; iLevel = iLevel->next_sibling()){
+		xml_attribute<> *xAttrib = iLevel->first_attribute("name");
+		if(xAttrib && (strcmp(xAttrib->value(),LevelName) == 0)){
+			const char *cSrc,*cMap;
+			if(!ReadAttribute(iLevel,"src",cSrc))
+				return false;
+			if(!ReadAttribute(iLevel,"map",cMap))
+				return false;
+			Src = cSrc;
+			Map = cMap;
+			return true;
+		}
+	}
+	return false;
+}

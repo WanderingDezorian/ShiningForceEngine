@@ -76,11 +76,24 @@ public:
 };
 
 class MasterManifest : public XmlDoc{
-	rapidxml::xml_node<> *Layer;
+	rapidxml::xml_node<> *Levels;
+/*	struct MapNotes{
+		bool Searched;
+		std::set<std::string> Warps;
+	};
+	std::map<std::string,std::string> ExistingTags;
+	std::map<std::string,std::string> NeededTags;*/
 public:
 	MasterManifest() : Layer(0) {}
 	~MasterManifest(){}
 	bool OpenFile(const char* Filename);
+
+	bool ValidateManifest(ZipfileInterface &ToVal);
+	// 1) Verify all files exist
+	// 2) Determine maximum file size
+	// 3) Validate all linkages (todo)
+
+	bool GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map);
 };
 
 #endif // XMLMAP_H
