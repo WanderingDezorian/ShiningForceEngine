@@ -51,7 +51,7 @@ bool Logic_MajorTic_StartScreen(GameState &MainGameState, std::string &NextZone)
 	return true;
 }
 
-bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
+bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState){
 	MainGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
 	return true;
 }
