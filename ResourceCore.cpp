@@ -307,6 +307,58 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState 
 	return true;
 }
 
+bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Data){ // Update later to support zip-file resource set
+	// Load manifest
+	unsigned int LevelSplit = LevelName.find('&');
+	std::string SrcName = LevelName.substr(0,LevelSplit);
+	std::string MapName;
+	{
+		MasterManifest Manifest;
+		if(!Manifest.OpenFile("manifest.xml"))
+			return false;
+		if(!Manifest.GetLevelFiles(SrcName.c_str(),SrcName,MapName))
+			return false;
+
+	}
+	// Load map
+	Data.Graphics.TileLayersEnd = Data.Graphics.TileLayers + LoadMap(MapName.c_str(), GCore, Data); // Returns number of layers provided
+	// Initialize zone
+	// Ready level src
+	// Final initialization
+	Data.Graphics.SpriteLayerDepth = 1;
+	Data.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
+	// TODO:  Do this elsewhere
+	for(TileMapping* iLayer = Data.Graphics.TileLayers; iLayer < Data.Graphics.TileLayersEnd; iLayer++)
+		Data.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
+	//////// Load sprites
+	Sprite mySprite;
+	mySprite.RootBufferOffset = 0;
+	mySprite.OrientationBufferOffset = 0;
+	mySprite.OrientationBufferSize = 2;
+	mySprite.CurrentOffset = 0;
+	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
+	mySprite.Position = Point(7,5) * PTileSize;
+	Data.Graphics.AllSprites.push_back(mySprite);
+	SDL_Surface* Temp = LoadPng("Noah.png");
+	SurfaceGuard GuardTemp(Temp);
+	for(int i = 0; i < 8; i++){
+		GCore.LoadSpriteBuffer(i,Temp,i*PTileSize,0);
+	}
+
+	///////// Load mobiles
+	Data.Mobs.resize(1);
+	Data.Mobs[0].OccupiedTile = Point(7,5);
+
+	///////// Initialize game
+	Data.Graphics.GraphicsRefreshRequired = true;
+	Data.FramesUntilLowRate = 1;
+	Data.FramesInMode = 0;
+
+	Data.Music.SetBgm("Map1.ogg");
+	Data.Music.Play();
+	return true;
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Zipfile interface implementation
 

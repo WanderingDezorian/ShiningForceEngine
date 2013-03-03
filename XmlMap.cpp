@@ -333,6 +333,10 @@ bool MasterManifest::ValidateManifest(ZipfileInterface &ToVal){
 }
 
 bool MasterManifest::GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map){
+	if(*LevelName == '%'){ // Translate keyword into actual value.
+		if(!ReadAttribute(Levels,LevelName+1,LevelName))
+			return false;
+	}
 	for(rapidxml::xml_node<> *iLevel = Levels->first_node(); iLevel != 0; iLevel = iLevel->next_sibling()){
 		xml_attribute<> *xAttrib = iLevel->first_attribute("name");
 		if(xAttrib && (strcmp(xAttrib->value(),LevelName) == 0)){

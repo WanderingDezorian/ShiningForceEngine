@@ -87,7 +87,7 @@ int main(int argc, char** argv){
 			case GameState::MODE_WORLDMAP:
 			case GameState::MODE_TOWN:
 			case GameState::MODE_BATTLE:
-				if(!Initialize_Battle(myGraphicsCore,myGameState))
+				if(!LoadLevel(NextZone,myGraphicsCore,myGameState))
 					throw "Failed to initialize new mode.";
 				NextZone = MasterLoop<Logic_MajorTic_Battle,Logic_MinorTic_Battle>(myGraphicsCore,myGameState);
 				break;
