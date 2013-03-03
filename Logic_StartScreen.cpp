@@ -8,7 +8,7 @@ void AbortGame(GameState &MainGameState, const char* Message){
 }
 
 #include "ResourceCore.h"
-bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
+bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState){
 	MainGameState.Graphics.SpecialBuffers.resize(2);
 	if(!MainGameState.Graphics.SpecialBuffers[0].Load("TitleFrame1.bmp"))
 		return false;

@@ -1,7 +1,7 @@
 #include "main.h"
 #include "ResourceCore.h"
 
-bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames){
+bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState){
 	//////// Load tiles
 	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;

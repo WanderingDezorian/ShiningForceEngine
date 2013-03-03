@@ -11,9 +11,10 @@ void AbortGame(GameState &MainGameState, const char* Message = 0);
 // Each of these returns a string containing the next level to travel to.
 template<GameMajorLogicFunction MajorTic, GameMinorLogicFunction MinorTic> std::string MasterLoop(GraphicsCore &GCore, GameState &MainGameState);
 
-bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_Town(GraphicsCore &GCore,GameState &MainGameState, std::vector<std::string> &TileFilenames);
-bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
+bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState);
+
+bool Initialize_Town(GraphicsCore &GCore,GameState &MainGameState);
+bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState);
 bool Initialize_Ending(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
 bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
 

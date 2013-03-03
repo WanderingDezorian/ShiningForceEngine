@@ -76,19 +76,18 @@ int main(int argc, char** argv){
 			// Do default initialization
 			myGameState.Graphics.Reset();
 			myGameState.FramesUntilLowRate = 0; // Force a major update this turn, unless overridden
-			std::vector<std::string> TileFilenames;
 			// Do further initialization, and enter loop
 			switch(myGameState.MainGameMode){
 			case GameState::MODE_INTRO:
 			case GameState::MODE_STARTSCREEN:
-				if(!Initialize_StartScreen(myGraphicsCore,myGameState,TileFilenames))
+				if(!Initialize_StartScreen(myGraphicsCore,myGameState))
 					throw "Failed to initialize new mode.";
 				NextZone = MasterLoop<Logic_MajorTic_StartScreen,Logic_MinorTic_StartScreen>(myGraphicsCore,myGameState);
 				break;
 			case GameState::MODE_WORLDMAP:
 			case GameState::MODE_TOWN:
 			case GameState::MODE_BATTLE:
-				if(!Initialize_Battle(myGraphicsCore,myGameState,TileFilenames))
+				if(!Initialize_Battle(myGraphicsCore,myGameState))
 					throw "Failed to initialize new mode.";
 				NextZone = MasterLoop<Logic_MajorTic_Battle,Logic_MinorTic_Battle>(myGraphicsCore,myGameState);
 				break;
