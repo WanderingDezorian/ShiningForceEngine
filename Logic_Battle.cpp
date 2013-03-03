@@ -31,8 +31,6 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState, std::vecto
 
 	///////// Initialize game
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
-	MainGameState.MinorTicUpdate = Logic_MinorTic_Battle;
-	MainGameState.MajorTicUpdate = Logic_MajorTic_Battle;
 	MainGameState.FramesUntilLowRate = 1;
 	MainGameState.FramesInMode = 0;
 
@@ -61,7 +59,7 @@ bool Logic_MinorTic_Battle(GameState &MainGameState){
 	return true;
 }
 
-bool Logic_MajorTic_Battle(GameState &MainGameState){
+bool Logic_MajorTic_Battle(GameState &MainGameState, std::string &RetVal){
 	Mob* SelectedMob = &MainGameState.Mobs[0];
 	Sprite* SelectedSprite = &MainGameState.Graphics.AllSprites[0];
 	if(SelectedMob->Speed == 0){
@@ -124,3 +122,5 @@ bool Logic_MajorTic_Battle(GameState &MainGameState){
 		MainGameState.FramesUntilLowRate = 0;
 	return true;
 }
+
+

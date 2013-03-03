@@ -15,6 +15,7 @@
 
 #include <SDL/SDL.h>
 #include <iostream>
+#include <stdexcept>
 #include "main.h"
 #include "GraphicsCore.h"
 #include "InterfaceCore.h"
@@ -68,58 +69,42 @@ int main(int argc, char** argv){
 	myGameState.InitializeNewMode = true;
 	myGameState.Graphics.GraphicsFlipRequired = false;
 	myGameState.Graphics.GraphicsRefreshRequired = false;
-	myGameState.InitializeFunction = Initialize_StartScreen;
-
 	// Enter master loop
-	const clock_t ClocksPerFrame = CLOCKS_PER_SEC / 30;
-	const clock_t ClocksPerStep = ClocksPerFrame / 3;
-
-	while(myGameState.MainGameMode != GameState::MODE_EXITPROGRAM){
-		clock_t NextFrame = clock();
-		clock_t NextStep = NextFrame + ClocksPerStep;
-		NextFrame += ClocksPerFrame;
-
-		myGameState.Interface.PollInterface(NextStep);
-		NextStep += ClocksPerStep;
-		// Process game logic
-		if(myGameState.InitializeFunction){
+	try{
+		std::string NextZone;
+		while(myGameState.MainGameMode != GameState::MODE_EXITPROGRAM){
+			// Do default initialization
 			myGameState.Graphics.Reset();
 			myGameState.FramesUntilLowRate = 0; // Force a major update this turn, unless overridden
 			std::vector<std::string> TileFilenames;
-			if(myGameState.InitializeFunction(myGraphicsCore, myGameState,TileFilenames))
-				myGameState.InitializeFunction = 0;
-			else
-				AbortGame(myGameState,"Failed to initialize new mode.  Aborting program.");
-			// TODO:  Come up with better way to initialize
-//			if(!myGraphicsCore.LoadTileBuffer(TileFilenames))
-//				AbortGame(myGameState,"Failed to load required tiles.  Aborting program.");
-		} // if(myGameState.InitializeNewMode)
-		if(myGameState.FramesUntilLowRate)
-			myGameState.FramesUntilLowRate--;
-		else{
-			myGameState.MajorTicUpdate(myGameState);
+			// Do further initialization, and enter loop
+			switch(myGameState.MainGameMode){
+			case GameState::MODE_INTRO:
+			case GameState::MODE_STARTSCREEN:
+				if(!Initialize_StartScreen(myGraphicsCore,myGameState,TileFilenames))
+					throw "Failed to initialize new mode.";
+				NextZone = MasterLoop<Logic_MajorTic_StartScreen,Logic_MinorTic_StartScreen>(myGraphicsCore,myGameState);
+				break;
+			case GameState::MODE_WORLDMAP:
+			case GameState::MODE_TOWN:
+			case GameState::MODE_BATTLE:
+				if(!Initialize_Battle(myGraphicsCore,myGameState,TileFilenames))
+					throw "Failed to initialize new mode.";
+				NextZone = MasterLoop<Logic_MajorTic_Battle,Logic_MinorTic_Battle>(myGraphicsCore,myGameState);
+				break;
+			case GameState::MODE_ENDING:
+				throw std::runtime_error("Not implemented yet!");
+			}
 		}
-		myGameState.MinorTicUpdate(myGameState);
-		if(clock() >= NextStep)
-			cerr << "Logic overran alloted time" << endl;
-		// Wait for next frame
-		if(myGameState.Graphics.GraphicsRefreshRequired){
-			myGraphicsCore.PrepareNextFrame(myGameState.Graphics);
-			myGameState.Graphics.GraphicsFlipRequired = true;
-			myGameState.Graphics.GraphicsRefreshRequired = false;
-		}
-		if(clock() >= NextFrame)
-			cerr << "Graphic redraw overran alloted time" << endl;
-		while(clock() < NextFrame);
-		if(myGameState.Graphics.GraphicsFlipRequired){
-			myGraphicsCore.FlipBuffer();
-			myGameState.Graphics.GraphicsFlipRequired = false;
-		}
+	}catch(std::exception &e){
+		cerr << "std::exception caught: " << e.what() << endl;
+	}catch(const char* &e){
+		cerr << e << endl << "Aborting." << endl;
+	}catch(...){
+		cerr << "Unhandled unknown throwable caught.  Aborting." << endl;
 	}
-
 	// Close everything.
 
 	return 0;
 }
-
 

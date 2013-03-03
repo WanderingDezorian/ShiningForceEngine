@@ -10,7 +10,8 @@
 
 struct GameState;
 
-typedef bool (*GameLogicFunction) (GameState &MainGameState);
+typedef bool (*GameMajorLogicFunction) (GameState &MainGameState, std::string &NextZone);
+typedef bool (*GameMinorLogicFunction) (GameState &MainGameState);
 typedef bool (*ModeInitFunction) (GraphicsCore &GCore, GameState &MainGameState, std::vector<std::string> &TileFilenames);
 
 struct Mob{ // TODO:  Move to own file, eventually.
@@ -48,7 +49,9 @@ struct GameData{
 
 struct GameState{
 	enum TypeMainGameMode{
+		MODE_INTRO,
 		MODE_STARTSCREEN,
+		MODE_WORLDMAP,
 		MODE_TOWN,
 		MODE_BATTLE,
 		MODE_ENDING,
@@ -61,10 +64,6 @@ struct GameState{
 	unsigned int SelectedMob;
 	std::vector<Mob> Mobs;
 
-
-	ModeInitFunction InitializeFunction;
-	GameLogicFunction MinorTicUpdate;
-	GameLogicFunction MajorTicUpdate;
 	// Here is the interface data
 	InterfaceCore Interface;
 	MusicCore Music;

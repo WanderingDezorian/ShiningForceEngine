@@ -2,9 +2,9 @@
 #include <iostream>
 void AbortGame(GameState &MainGameState, const char* Message){
 	if(Message)
-		std::cerr << Message << std::endl;
+		throw(Message);
 	MainGameState.MainGameMode = GameState::MODE_EXITPROGRAM;
-	MainGameState.InitializeFunction = Initialize_ExitProgram;
+	throw("Game abort requested.");
 }
 
 #include "ResourceCore.h"
@@ -17,8 +17,6 @@ bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState, std::
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.Graphics.SpecialBuffers[0].SetEnable(true);
 	MainGameState.Graphics.SpecialBuffers[1].SetEnable(false);
-	MainGameState.MinorTicUpdate = Logic_MinorTic_StartScreen;
-	MainGameState.MajorTicUpdate = Logic_MajorTic_StartScreen;
 	MainGameState.Music.SetBgm("Opening.ogg");
 	MainGameState.Music.Play();
 	return true;
@@ -30,12 +28,17 @@ bool Logic_MinorTic_StartScreen(GameState &MainGameState){
 		AbortGame(MainGameState);
 	else if(Buttons & InterfaceCore::KEY_START){
 		std::cerr << "Start button pressed, entering battle." << std::endl;
-		MainGameState.InitializeFunction = Initialize_Battle;
+		MainGameState.MainGameMode = GameState::MODE_BATTLE;
+		MainGameState.FramesUntilLowRate = 0; // Force a low-rate update.
 	}
 	return true;
 }
 
-bool Logic_MajorTic_StartScreen(GameState &MainGameState){
+bool Logic_MajorTic_StartScreen(GameState &MainGameState, std::string &NextZone){
+	if(MainGameState.MainGameMode != GameState::MODE_STARTSCREEN){
+		NextZone = "%start";
+		return false;
+	}
 	if(MainGameState.Graphics.SpecialBuffers[0].GetEnable()){
 		MainGameState.Graphics.SpecialBuffers[0].SetEnable(false);
 		MainGameState.Graphics.SpecialBuffers[1].SetEnable(true);
@@ -53,11 +56,12 @@ bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState, std::
 	return true;
 }
 bool Logic_MinorTic_ExitProgram(GameState &MainGameState){
-	return true;
+	return false;
 }
 
-bool Logic_MajorTic_ExitProgram(GameState &MainGameState){
-	MainGameState.FramesUntilLowRate = 30;
-	return true;
+bool Logic_MajorTic_ExitProgram(GameState &MainGameState, std::string &NextZone){
+	MainGameState.FramesUntilLowRate = 0;
+	NextZone = "%void";
+	return false;
 }
 
