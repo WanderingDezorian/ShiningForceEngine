@@ -3,7 +3,7 @@
 
 bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState){
 	//////// Load tiles
-	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap1.tmx", GCore, MainGameState); // Returns number of layers provided
+	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap2.tmx", GCore, MainGameState); // Returns number of layers provided
 	MainGameState.Graphics.SpriteLayerDepth = 1;
 	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
 //	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);
@@ -17,7 +17,7 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState){
 	mySprite.OrientationBufferSize = 2;
 	mySprite.CurrentOffset = 0;
 	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
-	mySprite.Position = Point(7,5) * PTileSize;
+	mySprite.Position = Point(0,43) * PTileSize;
 	MainGameState.Graphics.AllSprites.push_back(mySprite);
 	SDL_Surface* Temp = LoadPng("Noah.png");
 	SurfaceGuard GuardTemp(Temp);
@@ -27,7 +27,7 @@ bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState){
 
 	///////// Load mobiles
 	MainGameState.Mobs.resize(1);
-	MainGameState.Mobs[0].OccupiedTile = Point(7,5);
+	MainGameState.Mobs[0].OccupiedTile = Point(0,43);
 
 	///////// Initialize game
 	MainGameState.Graphics.GraphicsRefreshRequired = true;

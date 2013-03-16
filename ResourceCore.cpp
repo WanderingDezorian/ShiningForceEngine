@@ -283,6 +283,7 @@ bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState 
 	bool AllResourcesLoadedCorrectly = true;
 	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0;
 	AllResourcesLoadedCorrectly &= GetMapInfo("TestMap1.tmx", NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
+	AllResourcesLoadedCorrectly &= GetMapInfo("TestMap2.tmx", NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
 
 	if(!AllResourcesLoadedCorrectly)
 		return false;
@@ -337,7 +338,7 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 	mySprite.OrientationBufferSize = 2;
 	mySprite.CurrentOffset = 0;
 	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
-	mySprite.Position = Point(7,5) * PTileSize;
+	mySprite.Position = Point(0,43) * PTileSize;
 	Data.Graphics.AllSprites.push_back(mySprite);
 	SDL_Surface* Temp = LoadPng("Noah.png");
 	SurfaceGuard GuardTemp(Temp);
@@ -347,7 +348,7 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 
 	///////// Load mobiles
 	Data.Mobs.resize(1);
-	Data.Mobs[0].OccupiedTile = Point(7,5);
+	Data.Mobs[0].OccupiedTile = Point(0,43);
 
 	///////// Initialize game
 	Data.Graphics.GraphicsRefreshRequired = true;

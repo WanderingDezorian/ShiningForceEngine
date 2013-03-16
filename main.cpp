@@ -60,7 +60,7 @@ int main(int argc, char** argv){
 	}
 
 	// Validate manifest
-	if(!InitializeResources("TestMap1.tmx", myGraphicsCore, myGameState)){
+	if(!InitializeResources("TestMap2.tmx", myGraphicsCore, myGameState)){
 		cerr << "Failed to initialize resource pool.  Verify resource files and retry.  Aborting." << endl;
 		return -1;
 	}
@@ -95,6 +95,9 @@ int main(int argc, char** argv){
 				throw std::runtime_error("Not implemented yet!");
 			}
 		}
+	}catch(rapidxml::parse_error &e){
+		cerr << "rapidxml::parse_error caught: " << e.what() << endl;
+		cerr << "Remainder of file was: " << e.where<char>() << endl;
 	}catch(std::exception &e){
 		cerr << "std::exception caught: " << e.what() << endl;
 	}catch(const char* &e){

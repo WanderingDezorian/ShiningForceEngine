@@ -9,3 +9,4 @@
 .project
 Debug/
 Release/
+.Tasks/undo.data

@@ -111,11 +111,12 @@ bool XmlDoc::OpenFile(const char* Filename){
 		CloseFile();
 		return false;
 	}
-	FileBuf.Buf[fin.tellg()] = '\0'; //Put in null-terminating zero.
+	FileBuf.Buf[fin.gcount()] = '\0'; //Put in null-terminating zero.
 	try{
 		Doc.parse<0>(FileBuf.Buf);
-	}catch(...){
+	}catch(rapidxml::parse_error &e){
 		CloseFile();
+		throw e;
 		return false;
 	}
 	return true;

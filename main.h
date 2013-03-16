@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "GameState.h"
+#include "XmlMap.h"
 #include <iostream>
 
 // TODO:  Add an Exit function
