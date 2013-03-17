@@ -21,6 +21,13 @@ struct Mob{ // TODO:  Move to own file, eventually.
 	Mob() : OccupiedTile(), Busy(false), Speed(0) {}
 };
 
+struct Special{
+	Point Pos;
+	Point Range;
+	char Type;
+	char Data[32]; // TODO:  Use pointer to level data instead?
+};
+
 struct GameData{
 	enum BlockerFlags{
 		BLOCKER_MAP = 0x01, // Tile is set as a blocking tile
@@ -41,10 +48,13 @@ struct GameData{
 	Mob* Mobs;
 	unsigned int MobBufferSize;
 	Mob* SelectedMob;
+	unsigned int SpecialBufferSize;
+	Special* Specials;
+	Special* SpecialsBufEnd;
 
-	GameData(): Blockers(0), BlockerBufferSize(0), Mobs(0), MobBufferSize(0), SelectedMob(0) {}
-	~GameData(){ if(Blockers) delete[] Blockers; if(Mobs) delete[] Mobs; }
-	bool Initialize(unsigned int MaxMapSizeX, unsigned int MaxMapSizeY, unsigned int MaxNumMobs);
+	GameData(): Blockers(0), BlockerBufferSize(0), Mobs(0), MobBufferSize(0), SelectedMob(0), SpecialBufferSize(0), Specials(0), SpecialsBufEnd(0) {}
+	~GameData(){ if(Blockers) delete[] Blockers; if(Mobs) delete[] Mobs; if(Specials) delete[] Specials; }
+	bool Initialize(unsigned int MaxMapSizeX, unsigned int MaxMapSizeY, unsigned int MaxNumMobs, unsigned int MaxNumSpecials);
 };
 
 struct GameState{

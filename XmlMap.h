@@ -63,9 +63,12 @@ public:
 	bool NextLayer();
 	Point GetLayerSize();
 	Point GetBlockerSizeInTiles();
+	Point GetEntryPoint(const char* AnchorName);
+	unsigned int GetNumSpecials();
 	bool LoadLayerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad = true);
 	bool LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad = true); //TODO:  Verify blocker size is less than map max size.
 	bool LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,unsigned int> &TileAssignments);
+	bool LoadSpecials(GameData &LoadTo);
 };
 
 class LevelFile : public XmlDoc{

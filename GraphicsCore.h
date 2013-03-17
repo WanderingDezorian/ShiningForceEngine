@@ -18,6 +18,8 @@ struct Point{
 
 	bool operator==(const Point &Val){ return (X == Val.X) && (Y == Val.Y); }
 	bool operator==(const unsigned int &Val){ return (X == Val) && (Y == Val); }
+	bool Outside(const Point &Val){ return (X > Val.X) || (Y > Val.Y); }
+	bool Outside(const unsigned int &Val){ return (X > Val) || (Y > Val); }
 	Point operator+(const Point &Val)const{ return Point(X+Val.X,Y+Val.Y); }
 	Point operator-(const Point &Val)const{ return Point(X-Val.X,Y-Val.Y); }
 	Point operator*(const Point &Val)const{ return Point(X*Val.X,Y*Val.Y); }

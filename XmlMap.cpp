@@ -315,6 +315,101 @@ Point MapFile::GetBlockerSizeInTiles(){
 	return Point(0);
 }
 
+Point MapFile::GetEntryPoint(const char *AnchorName){
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return Point(0);
+	for(rapidxml::xml_node<> *pGroup = map->first_node("objectgroup"); pGroup != 0; pGroup = pGroup->next_sibling("objectgroup")){
+		for(rapidxml::xml_node<> *pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
+			const char* Attr;
+			if(ReadAttribute(pObj,"type",Attr) && ((strcmp(Attr,"anchor") == 0) || (strcmp(Attr,"g2anchor") == 0))
+					&& ReadAttribute(pObj,"name",Attr) && (strcmp(Attr,AnchorName) == 0)){
+				Point RetVal;
+				if(!ReadAttribute(pObj,"x",RetVal.X))
+					return Point(0);
+				if(!ReadAttribute(pObj,"y",RetVal.Y))
+					return Point(0);
+				RetVal /= PTileSize;
+				return RetVal;
+			}
+		}
+	}
+	return Point(0);
+}
+
+unsigned int MapFile::GetNumSpecials(){
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return 0;
+	unsigned int RetVal = 0;
+	for(rapidxml::xml_node<> *pGroup = map->first_node("objectgroup"); pGroup != 0; pGroup = pGroup->next_sibling("objectgroup")){
+		for(rapidxml::xml_node<> *pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
+			const char* Attr;
+			if(!ReadAttribute(pObj,"type",Attr))
+				continue;
+			if((strcmp(Attr,"goto") == 0)
+					|| (strcmp(Attr,"gosub") == 0)
+					|| (strcmp(Attr,"g2anchor") == 0))
+				RetVal++;
+		}
+	}
+	return RetVal;
+}
+
+bool MapFile::LoadSpecials(GameData &LoadTo){
+	Point BlockerSizeInTiles = GetBlockerSizeInTiles();
+	if(BlockerSizeInTiles == 0)
+		return false;
+	rapidxml::xml_node<> *map = Doc.first_node("map");
+	if(map == 0)
+		return false;
+	LoadTo.SpecialsBufEnd = LoadTo.Specials + LoadTo.SpecialBufferSize;
+	for(rapidxml::xml_node<> *pGroup = map->first_node("objectgroup"); pGroup != 0; pGroup = pGroup->next_sibling("objectgroup")){
+		for(rapidxml::xml_node<> *pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
+			const char* Attr;
+			if(!ReadAttribute(pObj,"type",Attr))
+				continue;
+			char Type = '\0';
+			if((strcmp(Attr,"goto") == 0) || (strcmp(Attr,"g2anchor") == 0))
+				Type = 'g';
+			else if(strcmp(Attr,"gosub") == 0)
+				Type = 's';
+			if(Type == '\0')
+				continue;
+			if(LoadTo.SpecialsBufEnd == LoadTo.Specials + LoadTo.SpecialBufferSize) // No more room
+				return false;
+			LoadTo.SpecialsBufEnd->Type = Type;
+			if(!ReadAttribute(pObj,"x",LoadTo.SpecialsBufEnd->Pos.X))
+				return false;
+			if(!ReadAttribute(pObj,"y",LoadTo.SpecialsBufEnd->Pos.Y))
+				return false;
+			if(!ReadAttribute(pObj,"width",LoadTo.SpecialsBufEnd->Range.X))
+				return false;
+			if(!ReadAttribute(pObj,"height",LoadTo.SpecialsBufEnd->Range.Y))
+				return false;
+			if(!ReadAttribute(pObj,"name",Attr))
+				return false;
+			strncpy(LoadTo.SpecialsBufEnd->Data,Attr,32);
+			if(LoadTo.SpecialsBufEnd->Data[31] != '\0') // Name too long.
+				return false;
+			LoadTo.SpecialsBufEnd->Pos /= PTileSize;
+			LoadTo.SpecialsBufEnd->Range /= PTileSize;
+			LoadTo.SpecialsBufEnd->Range.maxEq(1); // Range of zero makes no sense
+			if((LoadTo.SpecialsBufEnd->Pos + LoadTo.SpecialsBufEnd->Range).Outside(BlockerSizeInTiles))
+				return false;
+			// Flag in blockers.
+			for(int y = 0; y < LoadTo.SpecialsBufEnd->Range.Y; y++){
+				for(int x = 0; x < LoadTo.SpecialsBufEnd->Range.X; x++){
+					LoadTo.Blockers[(LoadTo.SpecialsBufEnd->Pos.Y + y) * BlockerSizeInTiles.X
+					                + LoadTo.SpecialsBufEnd->Pos.X + x] |= GameData::BLOCKER_SPECIAL;
+				}
+			}
+			LoadTo.SpecialsBufEnd++;
+		}
+	}
+	return true;
+}
+
 bool MasterManifest::OpenFile(const char* Filename){
 	Levels = 0;
 	if(!XmlDoc::OpenFile(Filename))

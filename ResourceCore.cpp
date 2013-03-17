@@ -179,6 +179,10 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMa
 		BlockerOut++;
 	}
 
+	// Load in the specials.
+	if(!MyMap.LoadSpecials(Data.Data))
+		return false;
+
 	do{
 		if(NumLayersLoaded >= NumLayers)
 			return NumLayersLoaded;
@@ -217,34 +221,18 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMa
 		// WORKING HERE:  Load in the tiles.
 	if(!MyMap.LoadImageData(Core,TileAssignments))
 		return -1;
-
-
-/*		for(xml_node<> *xLayer = xMap->first_node("objectgroup"); xLayer != 0; xLayer = xLayer->next_sibling("objectgroup")){
-			for(xml_node<> *xObj = xLayer->first_node("object"); xObj != 0; xObj = xObj->next_sibling("object")){
-				const char* Type = 0;
-				unsigned int x = 0, y = 0, w = 0, h = 0;
-				ReadAttribute(xObj,"type",Type);
-				ReadAttribute(xObj,"x",x);
-				ReadAttribute(xObj,"y",y);
-				ReadAttribute(xObj,"width",w);
-				ReadAttribute(xObj,"height",h);
-//					switch(Type){ // TODO:  Use lowercase comparisons
-//					case "blocker":
-//
-//
-//					}
-			}
-		}*/
 	return NumLayersLoaded;
 }
 
-bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &MaxSizeXinTiles, unsigned int &MaxSizeYinTiles,unsigned int &NumUniqueTiles){
+bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &MaxSizeXinTiles, unsigned int &MaxSizeYinTiles,unsigned int &NumUniqueTiles, unsigned int &NumSpecials){
 	MapFile MyMap;
 	if(!MyMap.PreAllocateBuffer(Filename))
 		return false;
 
 	if(!MyMap.OpenFile(Filename))
 		return false;
+	MyMap.ClearAttributeReadErrors();
+	NumSpecials = MyMap.GetNumSpecials();
 	MyMap.ClearAttributeReadErrors();
 
 	std::set<unsigned int> UniqueTiles;
@@ -276,7 +264,7 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 }
 
 bool InitializeResources(GraphicsCore& Core, GameState &Data){
-	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0;
+	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0, MaxNumSpecials = 0;
 
 	MasterManifest Manifest;
 	Manifest.PreAllocateBuffer("manifest.xml"); // Todo:  Make an allocate and load function.
@@ -290,14 +278,14 @@ bool InitializeResources(GraphicsCore& Core, GameState &Data){
 
 	bool AllResourcesLoadedCorrectly = true;
 	for(unsigned int i = 0; i < NumLevels; i++)
-		AllResourcesLoadedCorrectly &= GetMapInfo(Levels[i].second.c_str(), NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
+		AllResourcesLoadedCorrectly &= GetMapInfo(Levels[i].second.c_str(), NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles,MaxNumSpecials);
 
 	if(!AllResourcesLoadedCorrectly)
 		return false;
 	try{ // Catch allocation errors
 		if(!Core.AllocateTileBuffer(NumUniqueTiles))
 			return false;
-		if(!Data.Data.Initialize(MaxSizeX,MaxSizeY,1)) // TODO:  Don't hardcode max num mobs
+		if(!Data.Data.Initialize(MaxSizeX,MaxSizeY,1,MaxNumSpecials)) // TODO:  Don't hardcode max num mobs
 			return false;
 		Data.Graphics.AllocateTileLayers(NumLayers);
 		TileMapping::MaxBufferSize = MaxSizeX * MaxSizeY;
@@ -326,7 +314,6 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 			return false;
 		if(!Manifest.GetLevelFiles(SrcName.c_str(),SrcName,MapName))
 			return false;
-
 	}
 	// Load map
 	Data.Graphics.TileLayersEnd = Data.Graphics.TileLayers + LoadMap(MapName.c_str(), GCore, Data); // Returns number of layers provided
