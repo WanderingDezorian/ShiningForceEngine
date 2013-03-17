@@ -148,20 +148,14 @@ SDL_Surface* LoadPng(const char* Filename){ // Loads to a software image
 
 using namespace std;
 
-int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMapping* TileLayers, unsigned int NumLayers){ // Returns number of layers provided
+int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data, const char* EntryPointName, Point &EntryPoint){ //TileMapping* TileLayers, unsigned int NumLayers){ // Returns number of layers provided
 
 	TileMapping* TileLayers = Data.Graphics.TileLayers;
 	unsigned int NumLayers = Data.Graphics.NumTileLayers;
-	std::ifstream fin(Filename);
-	if(!fin.is_open())
-		return -1;
-	fin.seekg(0,std::ios_base::end);
 	MapFile MyMap;
-	MyMap.PreAllocateBuffer(fin.tellg());
-	fin.close();
-
 	if(!MyMap.OpenFile(Filename))
 		return false;
+
 	int NumLayersLoaded = 0;
 	std::map<unsigned int,unsigned int> TileAssignments;
 	MyMap.ClearAttributeReadErrors();
@@ -182,6 +176,10 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMa
 	// Load in the specials.
 	if(!MyMap.LoadSpecials(Data.Data))
 		return false;
+	if(EntryPointName)
+		EntryPoint = MyMap.GetEntryPoint(EntryPointName);
+	else
+		EntryPoint = MyMap.GetEntryPoint("Entry"); // Use this as the default name.
 
 	do{
 		if(NumLayersLoaded >= NumLayers)
@@ -242,8 +240,8 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 	Point LayerSize = MyMap.GetBlockerSizeInTiles();
 	if(LayerSize == 0)
 		return false;
-	MaxSizeXinTiles = LayerSize.X;
-	MaxSizeYinTiles = LayerSize.Y;
+	StoreMax(MaxSizeXinTiles, LayerSize.X);
+	StoreMax(MaxSizeYinTiles, LayerSize.Y);
 	unsigned int LayerNumEl;
 	do{
 		LocalNumLayers += 1;
@@ -307,7 +305,7 @@ bool InitializeResources(GraphicsCore& Core, GameState &Data){
 
 bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Data){ // Update later to support zip-file resource set
 	// Load manifest
-	unsigned int LevelSplit = LevelName.find('&');
+	std::string::size_type LevelSplit = LevelName.find(':');
 	std::string SrcName = LevelName.substr(0,LevelSplit);
 	std::string MapName;
 	{
@@ -318,7 +316,11 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 			return false;
 	}
 	// Load map
-	Data.Graphics.TileLayersEnd = Data.Graphics.TileLayers + LoadMap(MapName.c_str(), GCore, Data); // Returns number of layers provided
+	const char* EntryPointName = 0;
+	Point EntryPoint;
+	if(LevelSplit != std::string::npos)
+		EntryPointName = LevelName.c_str() + LevelSplit + 1;
+	Data.Graphics.TileLayersEnd = Data.Graphics.TileLayers + LoadMap(MapName.c_str(), GCore, Data, EntryPointName, EntryPoint); // Returns number of layers provided
 	// Initialize zone
 	// Ready level src
 	// Final initialization
@@ -334,7 +336,7 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 	mySprite.OrientationBufferSize = 2;
 	mySprite.CurrentOffset = 0;
 	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
-	mySprite.Position = Point(0,43) * PTileSize;
+	mySprite.Position = EntryPoint * PTileSize;
 	Data.Graphics.AllSprites.push_back(mySprite);
 	SDL_Surface* Temp = LoadPng("Noah.png");
 	SurfaceGuard GuardTemp(Temp);
@@ -344,7 +346,14 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 
 	///////// Load mobiles
 	Data.Mobs.resize(1);
-	Data.Mobs[0].OccupiedTile = Point(0,43);
+	Data.Mobs[0].OccupiedTile = EntryPoint;
+
+	///////// Set camera
+	EntryPoint.X -= (EntryPoint.X < 6) ? EntryPoint.X : 6;
+	EntryPoint.Y -= (EntryPoint.Y < 4) ? EntryPoint.Y : 4;
+	EntryPoint *= PTileSize;
+	Data.Graphics.MasterCamera = EntryPoint;
+	Data.Graphics.DesiredMasterCamera = EntryPoint;
 
 	///////// Initialize game
 	Data.Graphics.GraphicsRefreshRequired = true;

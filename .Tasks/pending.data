@@ -1,5 +1,4 @@
-[description:"Store transition tables" entry:"1363127968" project:"MapChange" status:"pending" uuid:"107205a5-42e8-453c-ab03-3074946484fe"]
-[description:"Identify entering transition spot" entry:"1363127982" project:"MapChange" status:"pending" uuid:"9f372161-f382-4e37-9cdb-833bb7db35e5"]
+[description:"Identify entering transition spot" end:"1363560423" entry:"1363127982" project:"MapChange" status:"completed" uuid:"9f372161-f382-4e37-9cdb-833bb7db35e5"]
 [description:"Change level" entry:"1363127995" project:"MapChange" status:"pending" uuid:"99625fba-29b7-4511-8cde-63371bad7e44"]
 [description:"Migrate manifest to zipfile" entry:"1363538348" project:"Zipfile" status:"pending" uuid:"c379fe78-944b-43f4-9ea5-e6a0c00fc9b8"]
 [description:"Migrate XmlMap to zipfile" entry:"1363538364" project:"Zipfile" status:"pending" uuid:"6ccf44db-4bce-4d63-a990-17e799595ae8"]
