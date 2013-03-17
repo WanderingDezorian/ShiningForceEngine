@@ -363,7 +363,7 @@ bool MapFile::LoadSpecials(GameData &LoadTo){
 	rapidxml::xml_node<> *map = Doc.first_node("map");
 	if(map == 0)
 		return false;
-	LoadTo.SpecialsBufEnd = LoadTo.Specials + LoadTo.SpecialBufferSize;
+	LoadTo.SpecialsBufEnd = LoadTo.Specials;
 	for(rapidxml::xml_node<> *pGroup = map->first_node("objectgroup"); pGroup != 0; pGroup = pGroup->next_sibling("objectgroup")){
 		for(rapidxml::xml_node<> *pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
 			const char* Attr;

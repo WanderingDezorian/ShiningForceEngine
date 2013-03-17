@@ -232,7 +232,9 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 	if(!MyMap.OpenFile(Filename))
 		return false;
 	MyMap.ClearAttributeReadErrors();
-	NumSpecials = MyMap.GetNumSpecials();
+	unsigned int LocalNumSpecials = MyMap.GetNumSpecials();
+	if(LocalNumSpecials > NumSpecials)
+		NumSpecials = LocalNumSpecials;
 	MyMap.ClearAttributeReadErrors();
 
 	std::set<unsigned int> UniqueTiles;
