@@ -6,7 +6,7 @@
 #include <map>
 #include "GameState.h"
 
-bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState &Data); // Update later to support zip-file resource set
+bool InitializeResources(GraphicsCore& Core, GameState &Data); // Update later to support zip-file resource set
 bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Data); // Update later to support zip-file resource set
 
 

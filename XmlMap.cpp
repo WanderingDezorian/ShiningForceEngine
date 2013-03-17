@@ -36,6 +36,18 @@ inline bool ReadAttribute(rapidxml::xml_node<> *Parent, const char* AttributeNam
 	return true;
 }
 
+inline bool ReadNumber(const char* String, int &Value){
+	char* EndScan;
+	Value = strtol(String, &EndScan, 0);
+	return (errno == 0) && (*EndScan == '\0'); // Make sure good scan with no garbage at end
+}
+
+inline bool ReadNumber(const char* String, unsigned int &Value){
+	char* EndScan;
+	Value = strtol(String, &EndScan, 0);
+	return (errno == 0) && (*EndScan == '\0'); // Make sure good scan with no garbage at end
+}
+
 static class b64decoder{
 	unsigned char Ring[256];
 	void Initialize(){
@@ -99,6 +111,17 @@ using namespace rapidxml;
 void XmlDoc::PreAllocateBuffer(unsigned int NewSize){
 	FileBuf.Resize(NewSize + 1); // Add extra character for null-termination.
 }
+
+bool XmlDoc::PreAllocateBuffer(const char* Filename){
+	std::ifstream fin(Filename);
+	if(!fin.is_open())
+		return false;
+	fin.seekg(0,std::ios_base::end);
+	PreAllocateBuffer(fin.tellg());
+	fin.close();
+	return true;
+}
+
 
 bool XmlDoc::OpenFile(const char* Filename){
 	if(FileBuf.Size == 0)
@@ -335,6 +358,10 @@ bool MasterManifest::ValidateManifest(ZipfileInterface &ToVal){
 
 bool MasterManifest::GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map){
 	if(*LevelName == '%'){ // Translate keyword into actual value.
+		unsigned int LevelNum;
+		if(ReadNumber(LevelName + 1,LevelNum))
+			return GetLevelFiles(LevelNum, Src, Map);
+		XmlDoc::ClearAttributeReadErrors();
 		if(!ReadAttribute(Levels,LevelName+1,LevelName))
 			return false;
 	}
@@ -352,4 +379,28 @@ bool MasterManifest::GetLevelFiles(const char* LevelName, std::string &Src, std:
 		}
 	}
 	return false;
+}
+
+bool MasterManifest::GetLevelFiles(unsigned int LevelNum, std::string &Src, std::string &Map){
+	for(rapidxml::xml_node<> *iLevel = Levels->first_node(); iLevel != 0; iLevel = iLevel->next_sibling()){
+		if(LevelNum == 0){
+			const char *cSrc,*cMap;
+			if(!ReadAttribute(iLevel,"src",cSrc))
+				return false;
+			if(!ReadAttribute(iLevel,"map",cMap))
+				return false;
+			Src = cSrc;
+			Map = cMap;
+			return true;
+		}
+		LevelNum--;
+	}
+	return false;
+}
+
+unsigned int MasterManifest::GetNumLevels(){
+	unsigned int RetVal = 0;
+	for(rapidxml::xml_node<> *iLevel = Levels->first_node(); iLevel != 0; iLevel = iLevel->next_sibling())
+		RetVal++;
+	return RetVal;
 }

@@ -45,7 +45,8 @@ public:
 	XmlDoc() : Doc() {}
 	~XmlDoc(){}
 
-	void PreAllocateBuffer(unsigned int NewSize);
+	static void PreAllocateBuffer(unsigned int NewSize);
+	static bool PreAllocateBuffer(const char* Filename);
 	bool OpenFile(const char* Filename);
 	bool IsOpen()const{ return (FileBuf.Size && (FileBuf.Buf[0] != '\0')); }
 	void CloseFile();
@@ -94,6 +95,8 @@ public:
 	// 3) Validate all linkages (todo)
 
 	bool GetLevelFiles(const char* LevelName, std::string &Src, std::string &Map);
+	bool GetLevelFiles(unsigned int LevelNum, std::string &Src, std::string &Map);
+	unsigned int GetNumLevels();
 };
 
 #endif // XMLMAP_H

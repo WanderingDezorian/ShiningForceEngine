@@ -60,7 +60,7 @@ int main(int argc, char** argv){
 	}
 
 	// Validate manifest
-	if(!InitializeResources("TestMap2.tmx", myGraphicsCore, myGameState)){
+	if(!InitializeResources(myGraphicsCore, myGameState)){
 		cerr << "Failed to initialize resource pool.  Verify resource files and retry.  Aborting." << endl;
 		return -1;
 	}

@@ -239,13 +239,9 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data){ //TileMa
 }
 
 bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &MaxSizeXinTiles, unsigned int &MaxSizeYinTiles,unsigned int &NumUniqueTiles){
-	std::ifstream fin(Filename);
-	if(!fin.is_open())
-		return false;
-	fin.seekg(0,std::ios_base::end);
 	MapFile MyMap;
-	MyMap.PreAllocateBuffer(fin.tellg());
-	fin.close();
+	if(!MyMap.PreAllocateBuffer(Filename))
+		return false;
 
 	if(!MyMap.OpenFile(Filename))
 		return false;
@@ -279,11 +275,22 @@ bool GetMapInfo(const char* Filename, unsigned int &NumLayers, unsigned int &Max
 	return true;
 }
 
-bool InitializeResources(const char* MapFilename, GraphicsCore& Core, GameState &Data){
-	bool AllResourcesLoadedCorrectly = true;
+bool InitializeResources(GraphicsCore& Core, GameState &Data){
 	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0;
-	AllResourcesLoadedCorrectly &= GetMapInfo("TestMap1.tmx", NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
-	AllResourcesLoadedCorrectly &= GetMapInfo("TestMap2.tmx", NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
+
+	MasterManifest Manifest;
+	Manifest.PreAllocateBuffer("manifest.xml"); // Todo:  Make an allocate and load function.
+	if(!Manifest.OpenFile("manifest.xml"))
+		return false;
+	unsigned int NumLevels = Manifest.GetNumLevels();
+	std::vector<std::pair<std::string,std::string> > Levels(NumLevels);
+	for(unsigned int i = 0; i < NumLevels; i++)
+		if(!Manifest.GetLevelFiles(i,Levels[i].first,Levels[i].second))
+			return false;
+
+	bool AllResourcesLoadedCorrectly = true;
+	for(unsigned int i = 0; i < NumLevels; i++)
+		AllResourcesLoadedCorrectly &= GetMapInfo(Levels[i].second.c_str(), NumLayers, MaxSizeX, MaxSizeY, NumUniqueTiles);
 
 	if(!AllResourcesLoadedCorrectly)
 		return false;
