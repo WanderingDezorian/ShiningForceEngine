@@ -1,44 +1,6 @@
 #include "main.h"
 #include "ResourceCore.h"
 
-bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState){
-	//////// Load tiles
-	MainGameState.Graphics.TileLayersEnd = MainGameState.Graphics.TileLayers + LoadMap("TestMap2.tmx", GCore, MainGameState); // Returns number of layers provided
-	MainGameState.Graphics.SpriteLayerDepth = 1;
-	MainGameState.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
-//	memset(MainGameState.Data.Blockers,0,MainGameState.Data.BlockerBufferSize);
-	// TODO:  Do this elsewhere
-	for(TileMapping* iLayer = MainGameState.Graphics.TileLayers; iLayer < MainGameState.Graphics.TileLayersEnd; iLayer++)
-		MainGameState.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
-	//////// Load sprites
-	Sprite mySprite;
-	mySprite.RootBufferOffset = 0;
-	mySprite.OrientationBufferOffset = 0;
-	mySprite.OrientationBufferSize = 2;
-	mySprite.CurrentOffset = 0;
-	mySprite.UpdatePattern = Sprite::UPDATE_LINEAR;
-	mySprite.Position = Point(0,43) * PTileSize;
-	MainGameState.Graphics.AllSprites.push_back(mySprite);
-	SDL_Surface* Temp = LoadPng("Noah.png");
-	SurfaceGuard GuardTemp(Temp);
-	for(int i = 0; i < 8; i++){
-		GCore.LoadSpriteBuffer(i,Temp,i*PTileSize,0);
-	}
-
-	///////// Load mobiles
-	MainGameState.Mobs.resize(1);
-	MainGameState.Mobs[0].OccupiedTile = Point(0,43);
-
-	///////// Initialize game
-	MainGameState.Graphics.GraphicsRefreshRequired = true;
-	MainGameState.FramesUntilLowRate = 1;
-	MainGameState.FramesInMode = 0;
-
-	MainGameState.Music.SetBgm("Map1.ogg");
-	MainGameState.Music.Play();
-	return true;
-}
-
 bool Logic_MinorTic_Battle(GameState &MainGameState){
 	MainGameState.FramesInMode++;
 	Mob* iMob = &MainGameState.Mobs[0];

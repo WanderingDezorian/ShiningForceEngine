@@ -15,7 +15,6 @@ template<GameMajorLogicFunction MajorTic, GameMinorLogicFunction MinorTic> std::
 bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState);
 
 bool Initialize_Town(GraphicsCore &GCore,GameState &MainGameState);
-bool Initialize_Battle(GraphicsCore &GCore, GameState &MainGameState);
 bool Initialize_Ending(GraphicsCore &GCore, GameState &MainGameState);
 bool Initialize_ExitProgram(GraphicsCore &GCore, GameState &MainGameState);
 
