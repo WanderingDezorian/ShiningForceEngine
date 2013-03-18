@@ -319,22 +319,34 @@ Point MapFile::GetEntryPoint(const char *AnchorName){
 	rapidxml::xml_node<> *map = Doc.first_node("map");
 	if(map == 0)
 		return Point(0);
+	rapidxml::xml_node<> *pObj = 0;
 	for(rapidxml::xml_node<> *pGroup = map->first_node("objectgroup"); pGroup != 0; pGroup = pGroup->next_sibling("objectgroup")){
-		for(rapidxml::xml_node<> *pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
+		for(pObj = pGroup->first_node("object"); pObj != 0; pObj = pObj->next_sibling("object")){
 			const char* Attr;
-			if(ReadAttribute(pObj,"type",Attr) && ((strcmp(Attr,"anchor") == 0) || (strcmp(Attr,"g2anchor") == 0))
-					&& ReadAttribute(pObj,"name",Attr) && (strcmp(Attr,AnchorName) == 0)){
-				Point RetVal;
-				if(!ReadAttribute(pObj,"x",RetVal.X))
-					return Point(0);
-				if(!ReadAttribute(pObj,"y",RetVal.Y))
-					return Point(0);
-				RetVal /= PTileSize;
-				return RetVal;
+			if(!ReadAttribute(pObj,"type",Attr))
+				continue;
+			if(strcmp(Attr,"anchor") == 0){
+				if(ReadAttribute(pObj,"name",Attr) && (strcmp(Attr,AnchorName) == 0)) // Anchor names must match exactly
+					break;
+			}
+			else if((strcmp(Attr,"g2anchor") == 0) && ReadAttribute(pObj,"name",Attr)){ // g2anchors should have the tails cut off before comparing
+				const char* Split = strchr(Attr,':'); // Check to see if tail is there.  May not be.
+				if((Split == 0) && (strcmp(Attr,AnchorName) == 0))
+					break;
+				if((Split != 0) && (strncmp(Attr,AnchorName,Split-Attr) == 0))
+					break;
 			}
 		}
 	}
-	return Point(0);
+	if(pObj == 0)
+		return Point(0);
+	Point RetVal;
+	if(!ReadAttribute(pObj,"x",RetVal.X))
+		return Point(0);
+	if(!ReadAttribute(pObj,"y",RetVal.Y))
+		return Point(0);
+	RetVal /= PTileSize;
+	return RetVal;
 }
 
 unsigned int MapFile::GetNumSpecials(){
@@ -370,8 +382,10 @@ bool MapFile::LoadSpecials(GameData &LoadTo){
 			if(!ReadAttribute(pObj,"type",Attr))
 				continue;
 			char Type = '\0';
-			if((strcmp(Attr,"goto") == 0) || (strcmp(Attr,"g2anchor") == 0))
+			if(strcmp(Attr,"goto") == 0)
 				Type = 'g';
+			else if(strcmp(Attr,"g2anchor") == 0)
+				Type = 'G';
 			else if(strcmp(Attr,"gosub") == 0)
 				Type = 's';
 			if(Type == '\0')
@@ -392,6 +406,12 @@ bool MapFile::LoadSpecials(GameData &LoadTo){
 			strncpy(LoadTo.SpecialsBufEnd->Data,Attr,32);
 			if(LoadTo.SpecialsBufEnd->Data[31] != '\0') // Name too long.
 				return false;
+			if(Type == 'G'){ // Trim tails on g2anchor
+				LoadTo.SpecialsBufEnd->Type = 'g';
+				char* Temp = strchr(LoadTo.SpecialsBufEnd->Data,':');
+				if(Temp)
+					*Temp = '\0';
+			}
 			LoadTo.SpecialsBufEnd->Pos /= PTileSize;
 			LoadTo.SpecialsBufEnd->Range /= PTileSize;
 			LoadTo.SpecialsBufEnd->Range.maxEq(1); // Range of zero makes no sense

@@ -357,7 +357,7 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 
 	///////// Initialize game
 	Data.Graphics.GraphicsRefreshRequired = true;
-	Data.FramesUntilLowRate = 1;
+	Data.FramesUntilLowRate = 15; // Give some recovery time.
 	Data.FramesInMode = 0;
 
 	Data.Music.SetBgm("Map1.ogg");

@@ -87,6 +87,7 @@ int main(int argc, char** argv){
 			case GameState::MODE_WORLDMAP:
 			case GameState::MODE_TOWN:
 			case GameState::MODE_BATTLE:
+				cout << "Loading level <" << NextZone << '>' << endl;
 				if(!LoadLevel(NextZone,myGraphicsCore,myGameState))
 					throw "Failed to initialize new mode.";
 				NextZone = MasterLoop<Logic_MajorTic_Battle,Logic_MinorTic_Battle>(myGraphicsCore,myGameState);

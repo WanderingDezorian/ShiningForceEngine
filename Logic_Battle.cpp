@@ -21,7 +21,20 @@ bool Logic_MinorTic_Battle(GameState &MainGameState){
 	return true;
 }
 
-bool Logic_MajorTic_Battle(GameState &MainGameState, std::string &RetVal){
+bool HandleSpecials(const Point &EnteredTile, GameState &MainGameState, std::string &RetVal){ // Returns true if exit requested.
+	for(Special* iSpecial = MainGameState.Data.Specials; iSpecial != MainGameState.Data.SpecialsBufEnd; iSpecial++){
+		if(iSpecial->Pos.InsideEq(EnteredTile) && EnteredTile.Inside(iSpecial->Pos + iSpecial->Range) ){
+			if(iSpecial->Type == 'g'){
+				RetVal = iSpecial->Data;
+				return true;
+			}
+			// Handle other specials here.
+		}
+	}
+	return false;
+}
+
+bool Logic_MajorTic_Battle(GameState &MainGameState, std::string &RetVal){ // Returns false if exit requested.
 	Mob* SelectedMob = &MainGameState.Mobs[0];
 	Sprite* SelectedSprite = &MainGameState.Graphics.AllSprites[0];
 	if(SelectedMob->Speed == 0){
@@ -31,44 +44,64 @@ bool Logic_MajorTic_Battle(GameState &MainGameState, std::string &RetVal){
 		else if(Buttons & InterfaceCore::KEY_UP){
 			SelectedSprite->OrientationBufferOffset = 2;
 			if(SelectedMob->OccupiedTile.Y != 0){
-				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y - 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_DOWN) == 0){
+				unsigned int TargIdx = (SelectedMob->OccupiedTile.Y - 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X;
+				if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_MASK_DOWN) == 0){
 					SelectedMob->OccupiedTile.Y--;
 					int Desired = (SelectedMob->OccupiedTile.Y - 2) * PTileSize;
 					if((Desired < MainGameState.Graphics.MasterCamera.Y) && (Desired >= 0))
 						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+					if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_SPECIAL) != 0){
+						if(HandleSpecials(SelectedMob->OccupiedTile,MainGameState,RetVal))
+							return false;
+					}
 				}
 			}
 		}
 		else if(Buttons & InterfaceCore::KEY_DOWN){
 			SelectedSprite->OrientationBufferOffset = 0;
 			if(SelectedMob->OccupiedTile.Y != MainGameState.Graphics.MasterMapSizeInTiles.Y - 1){
-				if((MainGameState.Data.Blockers[(SelectedMob->OccupiedTile.Y + 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X] & GameData::BLOCKER_MASK_UP) == 0){
+				unsigned int TargIdx = (SelectedMob->OccupiedTile.Y + 1) * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X;
+				if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_MASK_UP) == 0){
 					SelectedMob->OccupiedTile.Y++;
 					int Desired = (int(SelectedMob->OccupiedTile.Y) - 7) * PTileSize;
 					if((Desired > int(MainGameState.Graphics.MasterCamera.Y)) && (SelectedMob->OccupiedTile.Y < MainGameState.Graphics.MasterMapSizeInTiles.Y - 2))
 						MainGameState.Graphics.DesiredMasterCamera.Y = Desired;
+					if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_SPECIAL) != 0){
+						if(HandleSpecials(SelectedMob->OccupiedTile,MainGameState,RetVal))
+							return false;
+					}
 				}
 			}
 		}
 		else if(Buttons & InterfaceCore::KEY_LEFT){
 			SelectedSprite->OrientationBufferOffset = 6;
 			if(SelectedMob->OccupiedTile.X != 0){
-				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X - 1] & GameData::BLOCKER_MASK_RIGHT) == 0){
+				unsigned int TargIdx = SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X - 1;
+				if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_MASK_RIGHT) == 0){
 					SelectedMob->OccupiedTile.X--;
 					int Desired = (SelectedMob->OccupiedTile.X - 2) * PTileSize;
 					if((Desired < MainGameState.Graphics.MasterCamera.X) && (Desired >= 0))
 						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+					if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_SPECIAL) != 0){
+						if(HandleSpecials(SelectedMob->OccupiedTile,MainGameState,RetVal))
+							return false;
+					}
 				}
 			}
 		}
 		else if(Buttons & InterfaceCore::KEY_RIGHT){
 			SelectedSprite->OrientationBufferOffset = 4;
 			if(SelectedMob->OccupiedTile.X != MainGameState.Graphics.MasterMapSizeInTiles.X - 1){
-				if((MainGameState.Data.Blockers[SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X + 1] & GameData::BLOCKER_MASK_LEFT) == 0){
+				unsigned int TargIdx = SelectedMob->OccupiedTile.Y * MainGameState.Graphics.MasterMapSizeInTiles.X + SelectedMob->OccupiedTile.X + 1;
+				if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_MASK_LEFT) == 0){
 					SelectedMob->OccupiedTile.X++;
 					int Desired = int(SelectedMob->OccupiedTile.X * PTileSize) + (3*PTileSize - 320);
 					if((Desired > int(MainGameState.Graphics.MasterCamera.X)) && (SelectedMob->OccupiedTile.X < MainGameState.Graphics.MasterMapSizeInTiles.X - 2))
 						MainGameState.Graphics.DesiredMasterCamera.X = Desired;
+					if((MainGameState.Data.Blockers[TargIdx] & GameData::BLOCKER_SPECIAL) != 0){
+						if(HandleSpecials(SelectedMob->OccupiedTile,MainGameState,RetVal))
+							return false;
+					}
 				}
 			}
 		}
@@ -84,5 +117,3 @@ bool Logic_MajorTic_Battle(GameState &MainGameState, std::string &RetVal){
 		MainGameState.FramesUntilLowRate = 0;
 	return true;
 }
-
-
