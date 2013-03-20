@@ -3,8 +3,10 @@
 #include <fstream>
 #include <png.h>
 #include <set>
-///////////////////////////// Guard classes.  Makes loading structures exception safe.
 
+ZipfileInterface GLOBAL_ZipFile;
+
+///////////////////////////// Guard classes.  Makes loading structures exception safe.
 template<class T> inline T MAX(const T &A, const T &B){ return (A > B) ? A : B; }
 template<class T> inline void StoreMax(T &A, const T &B){ if(B > A) A = B; }
 

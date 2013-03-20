@@ -6,6 +6,9 @@
 #include "RapidXml/rapidxml.hpp"
 #include "ResourceCore.h"
 
+extern ZipfileInterface GLOBAL_ZipFile;
+
+
 // Game shall have the following files:
 //  Map files - *.tmx, follow "tiled" executable file format
 //  Level files - *.xml, indicate a map file, mob text, battle orientation, etc.

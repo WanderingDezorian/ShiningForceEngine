@@ -126,6 +126,16 @@ bool XmlDoc::PreAllocateBuffer(const char* Filename){
 bool XmlDoc::OpenFile(const char* Filename){
 	if(FileBuf.Size == 0)
 		return false;
+	static bool ZipfileAccess = true; // Believe in the zipfile until proven otherwise.
+	if(ZipfileAccess){
+		if(GLOBAL_ZipFile.OpenFile(Filename))
+			return GLOBAL_ZipFile.UncompressInexact((unsigned char*) FileBuf.Buf,FileBuf.Size);
+		if(GLOBAL_ZipFile.IsOpen()) // Failed, so verify zipfile exists.
+			return false;
+		//If zipfile does not exist...
+		ZipfileAccess = false;
+		// Intentional fallthrough to local access.
+	}
 	std::ifstream fin(Filename);
 	if(!fin.is_open())
 		return false;
