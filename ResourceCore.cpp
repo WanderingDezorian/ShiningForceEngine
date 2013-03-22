@@ -379,9 +379,22 @@ bool ZipfileInterface::OpenFile(const char* Filename){
 bool ZipfileInterface::IsOpen()const{ return zFile != 0; }
 void ZipfileInterface::CloseFile(){
 	if(zFile){
+		CloseChild();
 		unzClose(zFile);
 		zFile = 0;
 	}
+}
+void ZipfileInterface::CloseChild(){
+	if((zFile != 0) && ChildFileOpen)
+		unzCloseCurrentFile(zFile);
+	ChildFileOpen = false;
+}
+bool ZipfileInterface::OpenChild(){
+	CloseChild();
+	if(unzOpenCurrentFile(zFile) != UNZ_OK)
+		return false;
+	ChildFileOpen = true;
+	return true;
 }
 
 unsigned int ZipfileInterface::Filesize(const char* Filename)const{
@@ -421,9 +434,19 @@ bool ZipfileInterface::IsStoredUncompressed()const{
 	return Info.uncompressed_size == 0;
 }
 bool ZipfileInterface::Uncompress(unsigned char* Buffer, unsigned int BufferLength){
+	OpenChild();
 	return unzReadCurrentFile(zFile,Buffer,BufferLength) == BufferLength;
 }
 
 int ZipfileInterface::UncompressInexact(unsigned char* Buffer, unsigned int BufferLength){
+	OpenChild();
 	return unzReadCurrentFile(zFile,Buffer,BufferLength);
 }
+
+bool DefineGlobalZipfile(const char* ZipfileName){
+	if(ZipfileName != 0)
+		return GLOBAL_ZipFile.OpenFile(ZipfileName);
+	GLOBAL_ZipFile.CloseFile();
+	return true;
+}
+

@@ -59,6 +59,20 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
+	// Tie in zipfile
+	if(argc > 1){
+		if(strcmp(argv[2],"-d") != 0){ // Anything other than -d flag means it's a zipfile name
+			if(!DefineGlobalZipfile(argv[2])){
+				cerr << "Failed to open game file \"" << argv[2] << "\". Aborting." << endl;
+				return -1;
+			}
+		}
+	}
+	else if(!DefineGlobalZipfile("Game.zip")){
+		cerr << "Failed to open game file \"Game.zip\". Aborting." << endl;
+		return -1;
+	}
+
 	// Validate manifest
 	if(!InitializeResources(myGraphicsCore, myGameState)){
 		cerr << "Failed to initialize resource pool.  Verify resource files and retry.  Aborting." << endl;

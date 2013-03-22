@@ -8,6 +8,7 @@
 
 bool InitializeResources(GraphicsCore& Core, GameState &Data); // Update later to support zip-file resource set
 bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Data); // Update later to support zip-file resource set
+bool DefineGlobalZipfile(const char* ZipfileName);
 
 SDL_Surface* LoadPng(const char* Filename);
 
@@ -37,8 +38,11 @@ public:
 
 class ZipfileInterface{ // TODO:  Make singleton
 	unzFile zFile;
+	bool ChildFileOpen;
+	bool OpenChild();
+	void CloseChild();
 public:
-	ZipfileInterface() : zFile(0) {}
+	ZipfileInterface() : zFile(0), ChildFileOpen(false) {}
 	~ZipfileInterface(){ CloseFile(); }
 	bool OpenFile(const char* Filename);
 	bool IsOpen()const;
@@ -54,7 +58,5 @@ public:
 	int UncompressInexact(unsigned char* Buffer, unsigned int BufferLength);
 	int UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
 };
-
-bool DefineGlobalZipfile(const char* ZipfileName);
 
 #endif

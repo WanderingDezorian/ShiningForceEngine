@@ -113,6 +113,12 @@ void XmlDoc::PreAllocateBuffer(unsigned int NewSize){
 }
 
 bool XmlDoc::PreAllocateBuffer(const char* Filename){
+	if(GLOBAL_ZipFile.IsOpen()){
+		if(!GLOBAL_ZipFile.ContainsFile(Filename))
+			return false;
+		PreAllocateBuffer(GLOBAL_ZipFile.Filesize());
+		return true;
+	}
 	std::ifstream fin(Filename);
 	if(!fin.is_open())
 		return false;
@@ -128,12 +134,24 @@ bool XmlDoc::OpenFile(const char* Filename){
 		return false;
 	static bool ZipfileAccess = true; // Believe in the zipfile until proven otherwise.
 	if(ZipfileAccess){
-		if(GLOBAL_ZipFile.OpenFile(Filename))
-			return GLOBAL_ZipFile.UncompressInexact((unsigned char*) FileBuf.Buf,FileBuf.Size);
-		if(GLOBAL_ZipFile.IsOpen()) // Failed, so verify zipfile exists.
+		if(GLOBAL_ZipFile.ContainsFile(Filename)){
+			int FileSize = GLOBAL_ZipFile.UncompressInexact((unsigned char*) FileBuf.Buf,FileBuf.Size);
+			if(FileSize == 0)
+				return false;
+			FileBuf.Buf[FileSize] = '\0'; //Put in null-terminating zero.
+			try{
+				Doc.parse<0>(FileBuf.Buf);
+			}catch(rapidxml::parse_error &e){
+				CloseFile();
+				throw e;
+				return false;
+			}
+			return true;
+		}
+		else if(GLOBAL_ZipFile.IsOpen()) // Failed, so verify zipfile exists.
 			return false;
-		//If zipfile does not exist...
-		ZipfileAccess = false;
+		else //If zipfile does not exist...
+			ZipfileAccess = false;
 		// Intentional fallthrough to local access.
 	}
 	std::ifstream fin(Filename);
