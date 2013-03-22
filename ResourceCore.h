@@ -57,6 +57,8 @@ public:
 	bool Uncompress(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
 	int UncompressInexact(unsigned char* Buffer, unsigned int BufferLength);
 	int UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
+	int ReadSomeStart(const char* Filename, unsigned char* Buffer, unsigned int BufferLength);
+	int ReadSome(unsigned char* Buffer, unsigned int BufferLength);
 };
 
 #endif

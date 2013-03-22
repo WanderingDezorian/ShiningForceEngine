@@ -56,6 +56,10 @@ public:
 
 ///////////////////////////// Top level functions
 
+void PngZipRead(png_structp png_ptr, png_bytep data, png_size_t length){
+	GLOBAL_ZipFile.ReadSome(data,length);
+}
+
 SDL_Surface* LoadPng(const char* Filename){ // Loads to a software image
 	//Prepare the guards - prepare here so all are called by lngjmp
 	FileGuard guardfin;
@@ -63,15 +67,22 @@ SDL_Surface* LoadPng(const char* Filename){ // Loads to a software image
 	SurfaceGuard guardRetVal;
 
 	//Open the file
-	FILE *fin = fopen(Filename, "rb");
-	guardfin.GuardFile(fin);
-	if (!fin)
-		return 0;
-
+	FILE *fin;
+	if(!GLOBAL_ZipFile.IsOpen()){
+		fin = fopen(Filename, "rb");
+		guardfin.GuardFile(fin);
+		if (!fin)
+			return 0;
+	}
 	//Verify the header
 	{
 		png_byte Header[8];
-		fread(Header,1,8,fin);
+		if(GLOBAL_ZipFile.IsOpen()){
+			if(GLOBAL_ZipFile.ReadSomeStart(Filename,Header,8) != 8)
+				return 0;
+		}
+		else
+			fread(Header,1,8,fin);
 		if(png_sig_cmp(Header,0,8) != 0)
 			return 0; // File closing handled by guard.
 	}
@@ -92,8 +103,12 @@ SDL_Surface* LoadPng(const char* Filename){ // Loads to a software image
 		return 0; // If there's an error, jump here.  File and png closing still handled by guards
 
 	// Read the png header
-	png_init_io(png_ptr,fin);
+	if(GLOBAL_ZipFile.IsOpen()){
+		png_set_read_fn(png_ptr, NULL, PngZipRead); // Using global zipfile, so leave io ptr as null
+	}else
+		png_init_io(png_ptr,fin);
 	png_set_sig_bytes(png_ptr,8);
+
 	png_read_info(png_ptr,info_ptr);
 	unsigned int width = png_get_image_width(png_ptr, info_ptr);
 	unsigned int height = png_get_image_height(png_ptr, info_ptr);
@@ -450,3 +465,13 @@ bool DefineGlobalZipfile(const char* ZipfileName){
 	return true;
 }
 
+int ZipfileInterface::ReadSomeStart(const char* Filename, unsigned char* Buffer, unsigned int BufferLength){
+	if(!ContainsFile(Filename))
+		return false;
+	OpenChild();
+	return unzReadCurrentFile(zFile,Buffer,BufferLength);
+}
+
+int ZipfileInterface::ReadSome(unsigned char* Buffer, unsigned int BufferLength){
+	return unzReadCurrentFile(zFile,Buffer,BufferLength);
+}
