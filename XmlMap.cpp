@@ -132,37 +132,24 @@ bool XmlDoc::PreAllocateBuffer(const char* Filename){
 bool XmlDoc::OpenFile(const char* Filename){
 	if(FileBuf.Size == 0)
 		return false;
-	static bool ZipfileAccess = true; // Believe in the zipfile until proven otherwise.
-	if(ZipfileAccess){
-		if(GLOBAL_ZipFile.ContainsFile(Filename)){
-			int FileSize = GLOBAL_ZipFile.UncompressInexact((unsigned char*) FileBuf.Buf,FileBuf.Size);
-			if(FileSize == 0)
-				return false;
-			FileBuf.Buf[FileSize] = '\0'; //Put in null-terminating zero.
-			try{
-				Doc.parse<0>(FileBuf.Buf);
-			}catch(rapidxml::parse_error &e){
-				CloseFile();
-				throw e;
-				return false;
-			}
-			return true;
-		}
-		else if(GLOBAL_ZipFile.IsOpen()) // Failed, so verify zipfile exists.
+	int BytesRead;
+	if(GLOBAL_ZipFile.IsOpen()){
+		if(!GLOBAL_ZipFile.ContainsFile(Filename))
 			return false;
-		else //If zipfile does not exist...
-			ZipfileAccess = false;
-		// Intentional fallthrough to local access.
+		BytesRead = GLOBAL_ZipFile.UncompressInexact((unsigned char*) FileBuf.Buf,FileBuf.Size);
 	}
-	std::ifstream fin(Filename);
-	if(!fin.is_open())
-		return false;
-	fin.read(FileBuf.Buf,FileBuf.Size);
-	if(!fin.eof()){ // If we did not reach the end of the file...
-		CloseFile();
-		return false;
+	else{
+		std::ifstream fin(Filename);
+		if(!fin.is_open())
+			return false;
+		fin.read(FileBuf.Buf,FileBuf.Size);
+		if(!fin.eof()){ // If we did not reach the end of the file...
+			CloseFile();
+			return false;
+		}
+		BytesRead = fin.gcount();
 	}
-	FileBuf.Buf[fin.gcount()] = '\0'; //Put in null-terminating zero.
+	FileBuf.Buf[BytesRead] = '\0'; //Put in null-terminating zero.
 	try{
 		Doc.parse<0>(FileBuf.Buf);
 	}catch(rapidxml::parse_error &e){

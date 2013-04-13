@@ -1,3 +1,6 @@
+[description:"Migrate manifest to zipfile" end:"1365889790" entry:"1363538348" project:"Zipfile" status:"completed" uuid:"c379fe78-944b-43f4-9ea5-e6a0c00fc9b8"]
+[description:"Migrate XmlMap to zipfile" end:"1365889809" entry:"1363538364" project:"Zipfile" status:"completed" uuid:"6ccf44db-4bce-4d63-a990-17e799595ae8"]
+[description:"Migrate png images to zipfile" end:"1365889797" entry:"1363538373" project:"Zipfile" status:"completed" uuid:"e51b3d81-0008-431e-94f9-c304b22bd110"]
 [description:"Change level" end:"1363565796" entry:"1363127995" project:"MapChange" status:"completed" uuid:"99625fba-29b7-4511-8cde-63371bad7e44"]
 [description:"Identify entering transition spot" end:"1363560423" entry:"1363127982" project:"MapChange" status:"completed" uuid:"9f372161-f382-4e37-9cdb-833bb7db35e5"]
 [description:"Store transition tables" end:"1363548178" entry:"1363127968" project:"MapChange" status:"completed" uuid:"107205a5-42e8-453c-ab03-3074946484fe"]
