@@ -168,7 +168,7 @@ class SpecialtyBuffer{
 		void SetEnable(bool EnableFlag){ if(Buffer) DrawMe = EnableFlag; }
 		bool GetEnable() const{ return DrawMe; }
 		void SetPixelOffset(short X, short Y){ PixDest.x = X; PixDest.y = Y; }
-		bool Load(const char* Filename){ if(Buffer) SDL_FreeSurface(Buffer); if(Filename) Buffer = SDL_LoadBMP(Filename); return Buffer != 0; }
+		bool Load(const char* Filename);
 		SDL_Surface* AccessBuffer(){ return Buffer; }
 };
 

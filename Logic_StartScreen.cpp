@@ -10,9 +10,9 @@ void AbortGame(GameState &MainGameState, const char* Message){
 #include "ResourceCore.h"
 bool Initialize_StartScreen(GraphicsCore &GCore, GameState &MainGameState){
 	MainGameState.Graphics.SpecialBuffers.resize(2);
-	if(!MainGameState.Graphics.SpecialBuffers[0].Load("TitleFrame1.bmp"))
+	if(!MainGameState.Graphics.SpecialBuffers[0].Load("TitleFrame1.png"))
 		return false;
-	if(!MainGameState.Graphics.SpecialBuffers[1].Load("TitleFrame2.bmp"))
+	if(!MainGameState.Graphics.SpecialBuffers[1].Load("TitleFrame2.png"))
 		return false;
 	MainGameState.Graphics.GraphicsRefreshRequired = true;
 	MainGameState.Graphics.SpecialBuffers[0].SetEnable(true);

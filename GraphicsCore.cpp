@@ -147,3 +147,10 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 	return true;
 }
 
+bool SpecialtyBuffer::Load(const char* Filename){
+	if(Buffer)
+		SDL_FreeSurface(Buffer);
+	if(Filename)
+		Buffer = LoadPng(Filename);
+	return Buffer != 0;
+}
