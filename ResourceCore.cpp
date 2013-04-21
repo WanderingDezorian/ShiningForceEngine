@@ -5,6 +5,7 @@
 #include <set>
 
 ZipfileInterface GLOBAL_ZipFile;
+extern ZipfileInterface MUSIC_ZipFile;
 
 ///////////////////////////// Guard classes.  Makes loading structures exception safe.
 template<class T> inline T MAX(const T &A, const T &B){ return (A > B) ? A : B; }
@@ -473,8 +474,9 @@ int ZipfileInterface::UncompressInexact(unsigned char* Buffer, unsigned int Buff
 
 bool DefineGlobalZipfile(const char* ZipfileName){
 	if(ZipfileName != 0)
-		return GLOBAL_ZipFile.OpenFile(ZipfileName);
+		return GLOBAL_ZipFile.OpenFile(ZipfileName) && MUSIC_ZipFile.OpenFile(ZipfileName);
 	GLOBAL_ZipFile.CloseFile();
+	MUSIC_ZipFile.CloseFile();
 	return true;
 }
 
@@ -485,6 +487,12 @@ int ZipfileInterface::ReadSomeStart(const char* Filename, unsigned char* Buffer,
 	return unzReadCurrentFile(zFile,Buffer,BufferLength);
 }
 
+void ZipfileInterface::ReadSomeRestart(){ OpenChild(); }
+
 int ZipfileInterface::ReadSome(unsigned char* Buffer, unsigned int BufferLength){
 	return unzReadCurrentFile(zFile,Buffer,BufferLength);
+}
+
+z_off_t ZipfileInterface::ChildTell(){
+	return unztell(zFile);
 }

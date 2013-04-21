@@ -1,3 +1,5 @@
+[description:"Migrate music to zipfile" end:"1366574385" entry:"1363538393" project:"Zipfile" status:"completed" uuid:"e23c9370-46ab-4ace-8417-f980b8d89868"]
+[description:"Delete all non-zipfile resources and test" end:"1366574387" entry:"1363538418" project:"Zipfile" status:"completed" uuid:"d88e114c-4e5a-4c76-b998-1bddc156a6f4"]
 [description:"Get cmake file working" end:"1366564129" entry:"1365890137" project:"PR2" status:"completed" uuid:"1375d34f-3491-452d-95c4-644d6b695585"]
 [description:"Move all constants to a global variable" end:"1366555468" entry:"1363538481" project:"TileSize" status:"completed" uuid:"3a1ea456-99c8-403c-b3fa-59e6cc209ee3"]
 [description:"Test" end:"1366555471" entry:"1363538509" project:"TileSize" status:"completed" uuid:"e9876bc0-2dd2-4ec2-8ffb-99fca7ccd982"]

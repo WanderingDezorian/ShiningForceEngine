@@ -40,7 +40,6 @@ class ZipfileInterface{ // TODO:  Make singleton
 	unzFile zFile;
 	bool ChildFileOpen;
 	bool OpenChild();
-	void CloseChild();
 public:
 	ZipfileInterface() : zFile(0), ChildFileOpen(false) {}
 	~ZipfileInterface(){ CloseFile(); }
@@ -58,7 +57,10 @@ public:
 	int UncompressInexact(unsigned char* Buffer, unsigned int BufferLength);
 	int UncompressInexact(const char* Filename,unsigned char* Buffer, unsigned int BufferLength);
 	int ReadSomeStart(const char* Filename, unsigned char* Buffer, unsigned int BufferLength);
+	void ReadSomeRestart();
 	int ReadSome(unsigned char* Buffer, unsigned int BufferLength);
+	z_off_t ChildTell();
+	void CloseChild();
 };
 
 #endif

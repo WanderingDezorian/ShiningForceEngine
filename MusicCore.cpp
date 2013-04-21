@@ -1,6 +1,15 @@
 #include <SDL/SDL.h>
 #include "MusicCore.h"
+#include "ResourceCore.h"
 #include <memory>
+
+ZipfileInterface MUSIC_ZipFile;
+unsigned char TempWriteBuffer[1024];
+
+size_t zipRead(void *ptr, size_t size, size_t nmemb, void *datasource);
+int zipSeek(void *datasource, ogg_int64_t offset, int whence);
+int zipClose(void *datasource);
+long zipTell(void *datasource);
 
 static const int AUDIO_DESIRED_FREQUENCY = 44100;
 static const Uint16 AUDIO_DESIRED_FORMAT = AUDIO_S16SYS;
@@ -141,8 +150,21 @@ bool MusicCore::BGMdata::OpenFile(const char* Filename, const SDL_AudioSpec *Obt
 	if(Source == 0)
 		return false;
 	BGMdata::Filename = Filename;
-	if(ov_fopen(Filename,Source) != 0)
-		return false;
+	if(MUSIC_ZipFile.IsOpen()){
+		ov_callbacks Callbacks;
+		Callbacks.read_func = zipRead;
+		Callbacks.seek_func = zipSeek;
+		Callbacks.close_func = zipClose;
+		Callbacks.tell_func = zipTell;
+		if(!MUSIC_ZipFile.ContainsFile(Filename))
+			return false;
+		MUSIC_ZipFile.ReadSomeRestart();
+		if(ov_open_callbacks(&MUSIC_ZipFile, Source, 0, 0, Callbacks) != 0)
+			return false;
+	}else{
+		if(ov_fopen(Filename,Source) != 0)
+			return false;
+	}
 	vorbis_info *SourceInfo = ov_info(Source,-1);
 	if((SourceInfo->rate != ObtainedAudioSpec->freq) || (SourceInfo->channels != ObtainedAudioSpec->channels)){
 		Converter = new SDL_AudioCVT;
@@ -161,7 +183,49 @@ bool MusicCore::BGMdata::OpenFile(const char* Filename, const SDL_AudioSpec *Obt
 bool MusicCore::BGMdata::ResumeFile(OggVorbis_File *Source){
 	if(Source == 0)
 		return false;
-	if(ov_fopen(Filename.c_str(),Source) != 0)
-		return false;
+	if(MUSIC_ZipFile.IsOpen()){
+		ov_callbacks Callbacks;
+		Callbacks.read_func = zipRead;
+		Callbacks.seek_func = zipSeek;
+		Callbacks.close_func = zipClose;
+		Callbacks.tell_func = zipTell;
+		if(!MUSIC_ZipFile.ContainsFile(Filename.c_str()))
+			return false;
+		MUSIC_ZipFile.ReadSomeRestart();
+		if(ov_open_callbacks(&MUSIC_ZipFile, Source, 0, 0, Callbacks) != 0)
+			return false;
+	}else{
+		if(ov_fopen(Filename.c_str(),Source) != 0)
+			return false;
+	}
 	ov_pcm_seek(Source,PCM_Offset);
 }
+
+size_t zipRead(void *ptr, size_t size, size_t nmemb, void *datasource){
+	return ((ZipfileInterface*)datasource)->ReadSome((unsigned char*)ptr,size*nmemb)/size;
+}
+
+int zipSeek(void *datasource, ogg_int64_t offset, int whence){
+	// Convert to SEEK_CUR
+	if(whence == SEEK_SET)
+		offset -= ((ZipfileInterface*)datasource)->ChildTell();
+	else if(whence == SEEK_END)
+		offset += ((ZipfileInterface*)datasource)->Filesize() - ((ZipfileInterface*)datasource)->ChildTell();
+	// If negative, close and reopen file, adjust read size
+	if(offset < 0){
+		offset += ((ZipfileInterface*)datasource)->ChildTell();
+		((ZipfileInterface*)datasource)->ReadSomeRestart();
+	}
+	// Read as many bytes as needed.
+	while(offset > 1024){
+		if(((ZipfileInterface*)datasource)->ReadSome(TempWriteBuffer,1024) == 0)
+			break;
+		offset -= 1024;
+	}
+	if(offset > 0)
+		((ZipfileInterface*)datasource)->ReadSome(TempWriteBuffer,offset);
+
+	return 0;
+}
+int zipClose(void *datasource){ ((ZipfileInterface*) datasource)->CloseChild(); return 0; }
+long zipTell(void *datasource){ return ((ZipfileInterface*)datasource)->ChildTell(); }

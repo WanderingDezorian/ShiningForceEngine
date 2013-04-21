@@ -1,4 +1,2 @@
-[description:"Migrate music to zipfile" entry:"1363538393" project:"Zipfile" status:"pending" uuid:"e23c9370-46ab-4ace-8417-f980b8d89868"]
-[description:"Delete all non-zipfile resources and test" entry:"1363538418" project:"Zipfile" status:"pending" uuid:"d88e114c-4e5a-4c76-b998-1bddc156a6f4"]
 [description:"Add user interface to python script" entry:"1365890092" project:"LowBurn" status:"pending" uuid:"4cc271f5-5e53-4491-a3a7-f1520dc7653e"]
 [description:"Update constants in header" entry:"1365890122" project:"PR2" status:"pending" uuid:"eedd4b16-c99f-426f-93b6-11a502836a10"]
