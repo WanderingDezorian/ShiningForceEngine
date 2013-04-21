@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Program Name: Shining Force Community Project Engine
-// Author:  Sean Happel
+// Author:  Wandering Dezorian <wd03@verizon.net>
 //
 #define VERSION_MAJOR      0 // Still in pre-release
 #define VERSION_MINOR      2 // Pre-release version 2
 #define VERSION_REVISION   0 // First edit of this revision
 //
-#define BUILD_IS_RELEASED  false // Candidate build
+#define BUILD_IS_RELEASED  true // Candidate build
 //
 // See Changelog.txt for more details
 //

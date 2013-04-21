@@ -1,0 +1,7 @@
+Installation instructions-
+
+Be sure development versions oSDL, PNG and ZLIB libraries are installed on your machine.  The versions must be development, otherwise the headers this program needs will be missing.
+
+On linux, run "cmake ." followed by "make"
+On windows, run "cmake" on the folder, the build the generated solution file.
+

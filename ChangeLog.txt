@@ -1,3 +1,16 @@
+Pre-release v2: (Released 4/21/13)
+ Read from png images
+ Read from xml files
+ Read from ogg vorbis music files
+ Incorporate scrolling map (ground layer only)
+ Incorporate simple walking animations (ground and sprite layer only)
+ Use tiled map using loaded images
+ Use "blocks" to prevent movement in key areas
+ Demonstrate transition to new maps- use a simple overworld and two towns.
+ Add background music support
+ Switch map tiles from 24x24 to 12x12
+ Combine all resources into a single zipfile
+
 Pre-release v1: (Released 10/13/12)
  Game has simple start-screen
  Game has simple map (checkerboard tiles, no scrolling)
