@@ -1,24 +1,26 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
-PROJECT(GAME_ENGINE C CXX)
+PROJECT(MINIZIP C CXX)
 
 # Define our sources
 
 SET(SRC_FILES
   GraphicsCore.cpp   Logic_Battle.cpp       main.cpp       ResourceCore.cpp
-  InterfaceCore.cpp  Logic_StartScreen.cpp  MusicCore.cpp
+  InterfaceCore.cpp  Logic_StartScreen.cpp  MusicCore.cpp  XmlMap.cpp
+  GameState.cpp
 )
 
 FIND_PACKAGE ( SDL REQUIRED )
 FIND_PACKAGE ( PNG REQUIRED )
 FIND_PACKAGE ( ZLIB REQUIRED )
 FIND_LIBRARY(VORBIS_LIBRARY NAMES vorbisfile libvorbisfile )
+ADD_SUBDIRECTORY( MiniZip )
 # Workaround for the non-working REQUIRED flag
 if ( NOT SDL_FOUND )
    message ( FATAL_ERROR "SDL not found!" )
 endif ( NOT SDL_FOUND )
 
 # Define our projects
-LINK_LIBRARIES( ${SDL_LIBRARY} ${PNG_LIBRARY} ${VORBIS_LIBRARY} ${ZLIB_LIBRARY} )
+LINK_LIBRARIES( ${SDL_LIBRARY} ${PNG_LIBRARY} ${VORBIS_LIBRARY} ${ZLIB_LIBRARY} miniunz )
 
 ADD_EXECUTABLE(TestEngine ${SRC_FILES} )
 

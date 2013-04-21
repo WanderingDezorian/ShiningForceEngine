@@ -1,0 +1,21 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
+PROJECT(GAME_ENGINE C CXX)
+
+# Define our sources
+
+SET(UNZ_FILES		miniunz.c unzip.c ioapi.c)
+SET(ZIP_FILES		minizip.c zip.c   ioapi.c)
+
+if ( WIN32 )
+ SET(UNZ_FILES ${UNZ_FILES} iowin32.c)
+ SET(ZIP_FILES ${ZIP_FILES} iowin32.c)
+endif ( WIN32 )
+
+FIND_PACKAGE ( ZLIB REQUIRED )
+
+# Define our projects
+LINK_LIBRARIES( ${ZLIB_LIBRARY} )
+
+ADD_LIBRARY(minizip STATIC ${ZIP_FILES} )
+ADD_LIBRARY(miniunz STATIC ${UNZ_FILES} )
+
