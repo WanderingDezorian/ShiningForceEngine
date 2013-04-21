@@ -6,7 +6,15 @@
 #include <string>
 
 static const int PTileSize = 24; // Player tile size
-static const int GTileSize = 24; // Graphics tile size
+static const int GTileSize = 12; // Graphics tile size
+static const int ScreenWidthPixels = 320;
+static const int ScreenHeightPixels = 240;
+static const int ScreenWidthPTiles = (ScreenWidthPixels/PTileSize) + (ScreenWidthPixels % PTileSize != 0) + 1;
+static const int ScreenHeightPTiles = (ScreenHeightPixels/PTileSize) + (ScreenHeightPixels % PTileSize != 0) + 1;
+static const int ScreenWidthGTiles = (ScreenWidthPixels/GTileSize) + (ScreenWidthPixels % GTileSize != 0) + 1;
+static const int ScreenHeightGTiles = (ScreenHeightPixels/GTileSize) + (ScreenHeightPixels % GTileSize != 0) + 1;
+
+
 
 struct Point{
 	unsigned int X,Y; // TODO:  Does TileX/Y serve any purpose?

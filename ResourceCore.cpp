@@ -180,19 +180,38 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data, const cha
 
 	// Load the blocker buffer into a tile layer first, since map buffer uncompresses to ints, not bytes.  Then translate and downsize.
 	unsigned int LayerNumEl = TileMapping::MaxBufferSize;
-	if(!MyMap.LoadBlockerData(Data.Graphics.TileLayers->TileValues,LayerNumEl))
+	unsigned int BlockerGid = 0;
+	if(!MyMap.LoadBlockerData(Data.Graphics.TileLayers->TileValues,LayerNumEl,BlockerGid))
 		return false;
 	unsigned int* BlockerIn = Data.Graphics.TileLayers->TileValues;
 	unsigned char* BlockerOut = Data.Data.Blockers;
-	for(unsigned int i = 0; i < LayerNumEl; i++){
-		TranslateBlockers(BlockerIn, BlockerOut, 65);
-		BlockerIn++;
-		BlockerOut++;
+	Point BlockerGridSize = MyMap.GetBlockerSizeInTiles();
+	if(BlockerGridSize.X * BlockerGridSize.Y * (2 * 2) != LayerNumEl)
+		return false;
+	unsigned int BlockerInYStep = BlockerGridSize.X*2;
+	for(unsigned int y = 0; y < BlockerGridSize.Y; y++){
+		for(unsigned int x = 0; x < BlockerGridSize.X; x++){
+			unsigned char TempBlocker;
+			TranslateBlockers(BlockerIn, BlockerOut, BlockerGid);
+			TranslateBlockers(BlockerIn+1, &TempBlocker, BlockerGid);
+			*BlockerOut |= TempBlocker;
+			TranslateBlockers(BlockerIn+BlockerInYStep, &TempBlocker, BlockerGid);
+			*BlockerOut |= TempBlocker;
+			TranslateBlockers(BlockerIn+BlockerInYStep+1, &TempBlocker, BlockerGid);
+			*BlockerOut |= TempBlocker;
+			BlockerIn+=2;
+			BlockerOut++;
+		}
+		BlockerIn+=BlockerInYStep;
 	}
+	Data.Graphics.MasterMapSizeInTiles = BlockerGridSize;
 
 	// Load in the specials.
 	if(!MyMap.LoadSpecials(Data.Data))
 		return false;
+	ofstream fout("TempDump",ios_base::binary|ios_base::out);
+	fout.write((char*)Data.Data.Blockers,BlockerGridSize.X*BlockerGridSize.Y);
+	fout.close();
 	if(EntryPointName)
 		EntryPoint = MyMap.GetEntryPoint(EntryPointName);
 	else
@@ -342,10 +361,6 @@ bool LoadLevel(const std::string &LevelName, GraphicsCore& GCore, GameState &Dat
 	// Ready level src
 	// Final initialization
 	Data.Graphics.SpriteLayerDepth = 1;
-	Data.Graphics.MasterMapSizeInTiles = Point(0x7FFFFFFF,0x7FFFFFFF);
-	// TODO:  Do this elsewhere
-	for(TileMapping* iLayer = Data.Graphics.TileLayers; iLayer < Data.Graphics.TileLayersEnd; iLayer++)
-		Data.Graphics.MasterMapSizeInTiles.minEq(Point(iLayer->SizeX,iLayer->SizeY));
 	//////// Load sprites
 	Sprite mySprite;
 	mySprite.RootBufferOffset = 0;

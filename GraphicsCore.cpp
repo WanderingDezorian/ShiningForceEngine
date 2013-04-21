@@ -45,7 +45,7 @@ void Sprite::Update(){
 GraphicsCore::GraphicsCore() : MainWindow(0){
 	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_AUDIO) != 0)
 		return;
-	MainWindow = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);// | SDL_FULLSCREEN);
+	MainWindow = SDL_SetVideoMode(ScreenWidthPixels, ScreenHeightPixels, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);// | SDL_FULLSCREEN);
 
 	TileRect.h = GTileSize;
 	TileRect.w = GTileSize;
@@ -91,10 +91,10 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		int Y, yEnd;
 		SDL_Rect TempDest;
 		DestRect.y = -LayerSubIndex.Y;
-		for(Y = LayerTileIndex.Y, yEnd = Y + 11; Y < yEnd; Y++){
+		for(Y = LayerTileIndex.Y, yEnd = Y + ScreenHeightGTiles; Y < yEnd; Y++){
 			DestRect.x = -LayerSubIndex.X;
 			const unsigned int *iTile, *iTileEnd;
-			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + LayerTileIndex.X, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
+			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + LayerTileIndex.X, iTileEnd = iTile + ScreenWidthGTiles; iTile < iTileEnd; iTile++){
 				if(*iTile != TileMapping::NOT_A_TILE){
 					TileRect.x = *iTile * GTileSize;
 					TempDest = DestRect;
@@ -106,6 +106,7 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		}
 	}
 	// Draw sprite layer
+	TileRect.w = TileRect.h = DestRect.w = DestRect.h = PTileSize;
 	if(!CurrentState.AllSprites.empty()){
 		const Sprite *iSprite, *iSpriteEnd;
 		for(iSprite = &(CurrentState.AllSprites.at(0)), iSpriteEnd = iSprite + CurrentState.AllSprites.size(); iSprite < iSpriteEnd; iSprite++){
@@ -117,6 +118,8 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 			}
 		}
 	}
+	TileRect.w = TileRect.h = DestRect.w = DestRect.h = GTileSize;
+
 	// Draw tile layers above sprite layer
 	for(const TileMapping* iLayer = iSpriteLayer; iLayer < CurrentState.TileLayersEnd; iLayer++){
 		Point LayerSubIndex = ((CurrentState.MasterCamera * iLayer->ScaleNumerator) / iLayer->ScaleDenominator).min(iLayer->MaxCamera);
@@ -124,11 +127,11 @@ bool GraphicsCore::PrepareNextFrame(const GraphicalData &CurrentState){
 		LayerSubIndex -= LayerTileIndex * GTileSize;
 		int Y, yEnd;
 		SDL_Rect TempDest;
-		for(Y = LayerTileIndex.Y, yEnd = Y + 11; Y < yEnd; Y++){
+		for(Y = LayerTileIndex.Y, yEnd = Y + ScreenHeightGTiles; Y < yEnd; Y++){
 			DestRect.y = GTileSize * Y -LayerSubIndex.Y;
 			DestRect.x = -LayerSubIndex.X;
 			const unsigned int *iTile, *iTileEnd;
-			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + LayerTileIndex.X, iTileEnd = iTile + 15; iTile < iTileEnd; iTile++){
+			for(iTile = iLayer->TileValues + Y * iLayer->SizeX + LayerTileIndex.X, iTileEnd = iTile + ScreenWidthGTiles; iTile < iTileEnd; iTile++){
 				if(*iTile != TileMapping::NOT_A_TILE){
 					TileRect.x = *iTile * GTileSize;
 					TempDest = DestRect;

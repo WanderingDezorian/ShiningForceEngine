@@ -1,3 +1,6 @@
+[description:"Move all constants to a global variable" end:"1366555468" entry:"1363538481" project:"TileSize" status:"completed" uuid:"3a1ea456-99c8-403c-b3fa-59e6cc209ee3"]
+[description:"Test" end:"1366555471" entry:"1363538509" project:"TileSize" status:"completed" uuid:"e9876bc0-2dd2-4ec2-8ffb-99fca7ccd982"]
+[description:"Change maps to use appropriate tile size." end:"1366477384" entry:"1363538495" project:"TileSize" status:"completed" uuid:"a46f88c9-7b24-4a79-9b21-e21fc6af2729"]
 [description:"Migrate manifest to zipfile" end:"1365889790" entry:"1363538348" project:"Zipfile" status:"completed" uuid:"c379fe78-944b-43f4-9ea5-e6a0c00fc9b8"]
 [description:"Migrate XmlMap to zipfile" end:"1365889809" entry:"1363538364" project:"Zipfile" status:"completed" uuid:"6ccf44db-4bce-4d63-a990-17e799595ae8"]
 [description:"Migrate png images to zipfile" end:"1365889797" entry:"1363538373" project:"Zipfile" status:"completed" uuid:"e51b3d81-0008-431e-94f9-c304b22bd110"]

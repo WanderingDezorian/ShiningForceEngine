@@ -258,6 +258,14 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		return false;
 	for(xml_node<> *xSet = xMap->first_node("tileset"); xSet != 0; xSet = xSet->next_sibling("tileset")){
 		unsigned int FirstGid, NextImageFirstGid, Spacing, TileWidth;
+		const char* ImgSrcName;
+		xml_node<> *xFile = xSet->first_node("image");
+		if(xFile == 0)
+			return false;
+		if(!ReadAttribute(xFile,"source",ImgSrcName))
+			return false;
+		if(strcmp(ImgSrcName,"blockIcons.png") == 0) // This is the blocker source!
+			continue;
 		if(!(ReadAttribute(xSet,"tilewidth",FirstGid) && FirstGid == GTileSize)) // TODO:  Blockers won't be same width.
 			return false;
 		if(!(ReadAttribute(xSet,"tileheight",FirstGid) && FirstGid == GTileSize))
@@ -265,8 +273,8 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		if(!ReadAttribute(xSet,"firstgid",FirstGid))
 			return false;
 		if(!ReadAttribute(xSet,"spacing",Spacing))
-			return false;
-		xml_node<> *xFile = xSet->first_node("image");
+			Spacing = 0;
+
 		if(!ReadAttribute(xFile,"width",TileWidth))
 			return false;
 		TileWidth = (TileWidth + Spacing)/(GTileSize + Spacing);
@@ -278,12 +286,9 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 		std::map<unsigned int, unsigned int>::const_iterator iEnd = TileAssignments.lower_bound(NextImageFirstGid);
 		if(iAssign == iEnd)
 			continue;
-		xml_attribute<> *xFilename = xFile->first_attribute("source");
-		if(!xFilename)
-			return false;
-		SDL_Surface* CurrentTileSet = LoadPng(xFilename->value());
+		SDL_Surface* CurrentTileSet = LoadPng(ImgSrcName);
 		if(!CurrentTileSet)
-			throw 1;
+			return false;
 		SurfaceGuard TileSetGuard(CurrentTileSet);
 		while(iAssign != iEnd){
 			unsigned int TileY = (iAssign->first - FirstGid) / TileWidth;
@@ -295,7 +300,7 @@ bool MapFile::LoadImageData(GraphicsCore &LoadTo, const std::map<unsigned int,un
 	return true;
 }
 
-bool MapFile::LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, bool DestructiveLoad){
+bool MapFile::LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, unsigned int &BlockerGid, bool DestructiveLoad){
 	rapidxml::xml_node<> *map = Doc.first_node("map");
 	if(map == 0)
 		return false;
@@ -309,6 +314,18 @@ bool MapFile::LoadBlockerData(unsigned int* Buffer, unsigned int &BufferSize, bo
 		}
 	}
 	Layer = OriginalLayer;
+	BlockerGid = 0;
+	for(xml_node<> *xSet = map->first_node("tileset"); xSet != 0; xSet = xSet->next_sibling("tileset")){
+		xml_node<> *xImg = xSet->first_node("image");
+		if(xImg == 0)
+			continue;
+		const char* ImgName;
+		if(ReadAttribute(xImg,"source",ImgName) && (strcmp(ImgName,"blockIcons.png") == 0)){
+			ReadAttribute(xSet,"firstgid",BlockerGid);
+			break;
+		}
+	}
+
 	return RetVal;
 }
 
@@ -324,7 +341,7 @@ Point MapFile::GetBlockerSizeInTiles(){
 				return Point(0);
 			if(!ReadAttribute(pLayer,"height",RetVal.Y))
 				return Point(0);
-			return RetVal;
+			return RetVal/2;
 		}
 	}
 	return Point(0);
