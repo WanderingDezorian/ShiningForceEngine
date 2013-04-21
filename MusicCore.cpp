@@ -9,9 +9,7 @@ static const Uint16 AUDIO_DESIRED_SAMPLES = 4096;
 
 std::vector<char> MusicCore::BGMdata::ConversionBuffer;
 
-MusicCore::MusicCore() : ObtainedAudioSpec(0){
-	void my_audio_callback(void *userdata, Uint8 *stream, int len);
-
+MusicCore::MusicCore() : ActiveFile(false), ObtainedAudioSpec(0){
 	std::auto_ptr<SDL_AudioSpec> Desired(new SDL_AudioSpec);
 	ObtainedAudioSpec = new SDL_AudioSpec;
 
@@ -62,28 +60,28 @@ bool MusicCore::SetBgm(const char* Filename){
 bool MusicCore::PushBgm(const char* Filename){
 	SDL_LockAudio();
 	if(!MusicQueue.empty()){ // Save the current position
-		MusicQueue.top().PCM_Offset = ov_pcm_tell(&(MusicQueue.top().Source));
+		MusicQueue.top().PCM_Offset = ov_pcm_tell(&Source);
+		CloseFile();  // Clear the file
 	}
 	MusicQueue.push(BGMdata());
-	if(!MusicQueue.top().OpenFile(Filename,ObtainedAudioSpec)){
+	ActiveFile = MusicQueue.top().OpenFile(Filename,ObtainedAudioSpec,&Source);
+	if(!ActiveFile)
 		MusicQueue.pop();
-		return false;
-	}
 	SDL_UnlockAudio();
-	return true;
+	return ActiveFile;
 }
 
 bool MusicCore::PopBgm(){
 	if(MusicQueue.empty())
 		return false;
 	SDL_LockAudio();
+	CloseFile();
 	BGMdata& ToPop = MusicQueue.top();
-	ov_clear(&(ToPop.Source));
 	if(ToPop.Converter)
 		delete ToPop.Converter;
 	MusicQueue.pop();
 	if(!MusicQueue.empty())
-		ov_pcm_seek(&(MusicQueue.top().Source),MusicQueue.top().PCM_Offset);
+		ActiveFile = MusicQueue.top().ResumeFile(&Source);
 	SDL_UnlockAudio();
 	return true;
 }
@@ -92,9 +90,9 @@ void MusicCore::ClearBgm(){
 	Pause();
 	while(SDL_GetAudioStatus() == SDL_AUDIO_PLAYING);
 	SDL_LockAudio();
+	CloseFile();
 	while(!MusicQueue.empty()){
 		BGMdata& ToPop = MusicQueue.top();
-		ov_clear(&(ToPop.Source));
 		if(ToPop.Converter)
 			delete ToPop.Converter;
 		MusicQueue.pop();
@@ -118,13 +116,13 @@ void MusicCore::FillAudioBuffer(void* Core, uint8_t *stream, int len){
 	}
 
 	while(LeftToRead){
-		int BytesRead = ov_read(&(Data.Source), iStream, LeftToRead, ((MusicCore*) Core)->VorbisEndian, ((MusicCore*) Core)->VorbisSize, ((MusicCore*) Core)->VorbisSigned, &PositionInStream);
+		int BytesRead = ov_read(&(((MusicCore*) Core)->Source), iStream, LeftToRead, ((MusicCore*) Core)->VorbisEndian, ((MusicCore*) Core)->VorbisSize, ((MusicCore*) Core)->VorbisSigned, &PositionInStream);
 		if(BytesRead > 0){
 			LeftToRead -= BytesRead;
 			iStream += BytesRead;
 		}
 		else if(BytesRead == 0)
-			ov_pcm_seek(&(Data.Source),0);
+			ov_pcm_seek(&(((MusicCore*) Core)->Source),0);
 		else{
 			memset(stream,0,len);
 			return;
@@ -139,15 +137,17 @@ void MusicCore::FillAudioBuffer(void* Core, uint8_t *stream, int len){
 	return;
 }
 
-bool MusicCore::BGMdata::OpenFile(const char* Filename, const SDL_AudioSpec *ObtainedAudioSpec){
-	BGMdata::Filename = Filename;
-	if(ov_fopen(Filename,&Source) != 0)
+bool MusicCore::BGMdata::OpenFile(const char* Filename, const SDL_AudioSpec *ObtainedAudioSpec, OggVorbis_File *Source){
+	if(Source == 0)
 		return false;
-	vorbis_info *SourceInfo = ov_info(&Source,-1);
+	BGMdata::Filename = Filename;
+	if(ov_fopen(Filename,Source) != 0)
+		return false;
+	vorbis_info *SourceInfo = ov_info(Source,-1);
 	if((SourceInfo->rate != ObtainedAudioSpec->freq) || (SourceInfo->channels != ObtainedAudioSpec->channels)){
 		Converter = new SDL_AudioCVT;
 		if(SDL_BuildAudioCVT(Converter, ObtainedAudioSpec->format, SourceInfo->channels, SourceInfo->rate, ObtainedAudioSpec->format, ObtainedAudioSpec->channels, ObtainedAudioSpec->freq) == 0){
-			ov_clear(&Source);
+			ov_clear(Source);
 			delete Converter;
 			return false;
 		}
@@ -156,4 +156,12 @@ bool MusicCore::BGMdata::OpenFile(const char* Filename, const SDL_AudioSpec *Obt
 		Converter->buf = (Uint8*) &(ConversionBuffer.at(0));
 	}
 	return true;
+}
+
+bool MusicCore::BGMdata::ResumeFile(OggVorbis_File *Source){
+	if(Source == 0)
+		return false;
+	if(ov_fopen(Filename.c_str(),Source) != 0)
+		return false;
+	ov_pcm_seek(Source,PCM_Offset);
 }

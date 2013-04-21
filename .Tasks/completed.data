@@ -1,3 +1,4 @@
+[description:"Get cmake file working" end:"1366564129" entry:"1365890137" project:"PR2" status:"completed" uuid:"1375d34f-3491-452d-95c4-644d6b695585"]
 [description:"Move all constants to a global variable" end:"1366555468" entry:"1363538481" project:"TileSize" status:"completed" uuid:"3a1ea456-99c8-403c-b3fa-59e6cc209ee3"]
 [description:"Test" end:"1366555471" entry:"1363538509" project:"TileSize" status:"completed" uuid:"e9876bc0-2dd2-4ec2-8ffb-99fca7ccd982"]
 [description:"Change maps to use appropriate tile size." end:"1366477384" entry:"1363538495" project:"TileSize" status:"completed" uuid:"a46f88c9-7b24-4a79-9b21-e21fc6af2729"]

@@ -209,9 +209,6 @@ int LoadMap(const char* Filename, GraphicsCore &Core, GameState &Data, const cha
 	// Load in the specials.
 	if(!MyMap.LoadSpecials(Data.Data))
 		return false;
-	ofstream fout("TempDump",ios_base::binary|ios_base::out);
-	fout.write((char*)Data.Data.Blockers,BlockerGridSize.X*BlockerGridSize.Y);
-	fout.close();
 	if(EntryPointName)
 		EntryPoint = MyMap.GetEntryPoint(EntryPointName);
 	else
@@ -303,7 +300,8 @@ bool InitializeResources(GraphicsCore& Core, GameState &Data){
 	unsigned int NumLayers = 0, MaxSizeX = 0, MaxSizeY = 0, NumUniqueTiles = 0, MaxNumSpecials = 0;
 
 	MasterManifest Manifest;
-	Manifest.PreAllocateBuffer("manifest.xml"); // Todo:  Make an allocate and load function.
+	if(!Manifest.PreAllocateBuffer("manifest.xml")) // Todo:  Make an allocate and load function.
+		return false;
 	if(!Manifest.OpenFile("manifest.xml"))
 		return false;
 	unsigned int NumLevels = Manifest.GetNumLevels();

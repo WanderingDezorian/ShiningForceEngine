@@ -12,16 +12,19 @@ struct SDL_AudioSpec;
 class MusicCore{
 	struct BGMdata{
 		static std::vector<char> ConversionBuffer;
-		OggVorbis_File Source;
 		std::string Filename;
 		unsigned long long PCM_Offset;
 		SDL_AudioCVT* Converter;
 	public:
 		BGMdata() : Converter(0){};
-		bool OpenFile(const char* Filename, const SDL_AudioSpec *ObtainedAudioSpec);
+		~BGMdata(){} // Converter externally deleted, to avoid accidental deletions by SDL stack.
+		bool OpenFile(const char* Filename, const SDL_AudioSpec *ObtainedAudioSpec, OggVorbis_File *Source);
+		bool ResumeFile(OggVorbis_File *Source);
 	};
 	SDL_AudioSpec *ObtainedAudioSpec;
 	std::stack<BGMdata> MusicQueue;
+	bool ActiveFile;
+	OggVorbis_File Source;
 	int VorbisEndian;
 	int VorbisSize;
 	int VorbisSigned;
@@ -30,6 +33,7 @@ private:
 	MusicCore(const MusicCore &NoCopiesAllowed);
 	MusicCore& operator=(MusicCore &NoCopiesAllowed);
 	MusicCore& operator=(const MusicCore &NoCopiesAllowed);
+	void CloseFile(){ if(ActiveFile){ ov_clear(&Source); ActiveFile = false; } }
 public:
 	MusicCore();
 	~MusicCore();
